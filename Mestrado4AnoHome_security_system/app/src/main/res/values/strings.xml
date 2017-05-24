@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Home Security System</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="section_tab1">MEMBERS</string>
+    <string name="section_tab2">AT HOME</string>
+    <string name="section_tab3">HISTORY</string>
+</resources>
