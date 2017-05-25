@@ -1,14 +1,22 @@
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -37,12 +45,25 @@ import org.glassfish.jersey.client.ClientConfig;
  * 	 - enradas e saidas
  *  Como guardar os dados? Através de leitura e escrita de ficheiro.txt
  * Teste inicial: ver se o programa consegue receber na consola as mensagens do arduino
+ * commands:
+ * 
+ * Autenticar usando a app:
+ * http://192.168.1.6/arduino/digital/0/1 ou 0
+ * enviar notificação (pushbutton)
+ * http://192.168.1.6/arduino/digital/1/1 ou 0
+ * ativar/desativar modo silencioso
+ * http://192.168.1.6/arduino/digital/2/1 ou 0
+ * adicionar tag cartao/porta chaves
+ * http://192.168.1.6/arduino/digital/3/1 ou 0
+ * "Comando persistente para 
+ * 	ler as notificações de entrada e saida"
+ * http://192.168.1.6/arduino/digital/4/1 ou 0 
  *  */
 
 
 public class HomeSecuritySystemRestProxy {
 		final static String ARDUINO_INET_ADDR = "192.168.1.6";
-		final static int PORT = 80;
+		final static int PORT = 8000;
 		
 		//Diretoria de ficheiros
 		static String basePath = "./storage";
@@ -53,7 +74,7 @@ public class HomeSecuritySystemRestProxy {
 		static File residentsFile;
 		static File authenticPassages;
 		static File nonAuthenticPassages;
-		// Key : String with smartphone ip address concatenated with a magnetic card tag
+		// Key : String with smartphone credentials concatenated with a magnetic card tag
 		// Value : String with the resident Name
 		
 		static HashMap<String,String>residentsColl;
@@ -62,7 +83,8 @@ public class HomeSecuritySystemRestProxy {
 		static HashMap<String,Boolean>authenticatedEntrances;
 		static HashMap<String,Boolean>nonAuthenticatedEntrances;
 		
-		
+		//ServerSocket para receber do arduino
+		//Socket 
 		public static void main(String[] args) {
 			
 			 InputStream fromClient,fromArduino;
@@ -96,24 +118,34 @@ public class HomeSecuritySystemRestProxy {
 			 
 			 //Connecção com arduino e cliente
 			try {
-				client = new Socket(ARDUINO_INET_ADDR, PORT);
+			//	client = new Socket(ARDUINO_INET_ADDR, PORT);URL url = new URL("http://192.168.1.6/");
+				//URLConnection connection = url.openConnection();
+		//		BufferedReader in = new BufferedReader(
+			//			new InputStreamReader(connection.getInputStream()));
 				
-			 DataInputStream dis = new DataInputStream(client.getInputStream());
+				client = new Socket(ARDUINO_INET_ADDR,PORT);
 			 System.out.println("Setup complete");
-			 	while(true)
+			/* String inputLine;
+			 	while((inputLine = in.readLine())!=null)
 			 	{
-			 		System.out.println(dis.readUTF());
-			 	}
+			 		System.out.println(inputLine);
+			 	}*/
+			 BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+				 //System.out.println("Setup complete");
+				 	while(true)
+				 	{
+				 		System.out.println(in.readLine());
+				 	}
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
+			
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			} 
 	}
 		private static void uploadResidents(File residentsFile) {
-			// TODO Auto-generated method stub
+		
 			File[] residents = residentsFile.listFiles();
 			for(File resident:residents){
 				List<String> list = Arrays.asList(resident.list());
@@ -128,7 +160,7 @@ public class HomeSecuritySystemRestProxy {
 						String name = rawData.split("\\s")[1]; 
 						residentsColl.put(key,name);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+					
 						e.printStackTrace();
 					}
 				}
@@ -150,7 +182,7 @@ public class HomeSecuritySystemRestProxy {
 						Boolean value = Boolean.valueOf(rawData.split("\\s")[1]); 
 						authenticatedEntrances.put(key,value);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+						
 						e.printStackTrace();
 					}
 				}
@@ -172,12 +204,15 @@ public class HomeSecuritySystemRestProxy {
 						Boolean value = Boolean.valueOf(rawData.split("\\s")[1]); 
 						authenticatedEntrances.put(key,value);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+					
 						e.printStackTrace();
 					}
 				}
 				
 			}
+		}
+		private static void sendAtHome(){
+			
 		}
 		private static void receiveDataFromArduino(InputStream fromArduino){
 			
@@ -191,7 +226,7 @@ public class HomeSecuritySystemRestProxy {
 						System.out.println(fromArduino.read(messageBuffer));
 					
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+				
 					e.printStackTrace();
 				}
 					
@@ -205,11 +240,13 @@ public class HomeSecuritySystemRestProxy {
 		
 		/*Process data from arduino*/
 		private static void processData(String message, OutputStream toClient) {
+			
 			String date = String.valueOf(Calendar.getInstance().getTime());
+			//concatenacao credentials e date por _
+			String key = "";
 			switch(message)
 			{
 			case "NEA-":
-			
 					authenticatedEntrances.put(date,true);
 				break;
 			case "NEF-":
@@ -231,19 +268,36 @@ public class HomeSecuritySystemRestProxy {
 			
 		}
 		private static void broadcastAlert() {
-			// TODO Auto-generated method stub
+		
 			
 		}
 		//Writes commands to arduino
-		//Valid commands : /V/{String ipAddress} 
-		//				   /alarm/{String ipAddress} 
-		//				   /silenceMode/{String ipAddress}
-		private void sendOnDemandCommand(InputStream fromClient,OutputStream toArduino){
-		
+		//
+		private void sendOnDemandCommand(InputStream fromClient,OutputStream toArduino,int pinValue){
+			String urlToSend = "http://"+ARDUINO_INET_ADDR+"/arduino/digital/"+pinValue+"/1";
+			
 		}
 		
 		private void addResident(String credentials,String name){
 			residentsColl.put(credentials, name);
+			String toStore = credentials+" "+name;
+			File resident = new File(residentsFile.getAbsolutePath()+"/"+credentials);
+			if(!residentsColl.containsKey(credentials)){
+				if(!resident.exists())
+				{
+					try {
+						Files.write(resident.toPath(), toStore.getBytes(), StandardOpenOption.CREATE_NEW);
+					
+						FileOutputStream fos = new FileOutputStream(resident.getAbsolutePath());
+						BufferedOutputStream bos = new BufferedOutputStream(fos);
+						bos.write(toStore.getBytes());
+						bos.close();
+					} catch (IOException e) {
+					
+						e.printStackTrace();
+					}
+				}
+			}
 		}
 		
 		private static URI getBaseURI() {

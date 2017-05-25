@@ -4,8 +4,8 @@
 
 
 
-/*TODO : Autenticacao com o telemovel, interpretacao comandos da app
-  current schema:
+/*TODO : 
+  fazer counter para entradas e saidas para conseguir responder ao comando 4 vindo do servidor
     */
 //PINS
 const int pushbutton = 2;
@@ -34,9 +34,10 @@ bool exited = false;
 bool entrance = true;
 bool deviceAtLeft = false;
 bool authenticated = false;
+String tag = "";
 int inputState=0;
-//int tagCounter = 0;
-
+int tagCounter = 0;
+int entrancesCounter , exitsCounter = 0;
 //Device configurations
 bool silencedMode = true;
 int PRESENCERADIUS = 30;
@@ -47,7 +48,7 @@ MFRC522 rfidSensor(SSPIN,RSTPIN);
 
 
 //rfid tags memory
-char* tagMatrix[12];
+String tagMatrix[12];
 
 void setup() {
   //Initialize serial at 9600 baud rate
@@ -126,7 +127,9 @@ void loop()
   if (checkTag(content)){ 
     Serial.println("Authorized access");
    // Wifi.println("Authorized access");
+   tag = content;
     authenticated = true;
+   
     digitalWrite(ledGreen,HIGH);
    
      inputState = digitalRead(pushbutton);
@@ -156,6 +159,7 @@ void loop()
  else{
     Serial.println(" Access denied");
  //   Wifi.println(" Access denied");
+  
     digitalWrite(ledRed,HIGH);
     delay(500);
     digitalWrite(ledRed,LOW);
@@ -164,8 +168,15 @@ void loop()
 
 boolean checkTag(String content){
   boolean result = false;
-  for(int i = 0; i < 80; i++){
-      if(content.substring(1) == tagMatrix[i]){
+  content.trim();
+  Wifi.println(content);
+  Wifi.println(content.length());
+  for(int i = 0; i < tagCounter; i++){
+    Wifi.print("STR: ");
+    Wifi.println(tagMatrix[i]);
+      if(content.equals(tagMatrix[i])){
+        Wifi.println("found: ");
+        Wifi.println(tagMatrix[i]);
         result = true;
         }
   }
@@ -173,7 +184,8 @@ boolean checkTag(String content){
 }
 
 void setupTags(){
-   tagMatrix[0] = "11 B0 F8 65";
+   tagMatrix[tagCounter] = "11 B0 F8 65";
+   tagCounter++;
 }
 
 boolean checkPresence(){
@@ -214,8 +226,10 @@ boolean checkPresence(){
       exited =true;
       Serial.println("Exit");
       if(authenticated){
+        String toSend = "NSA"+tag;
+       toSend.replace(" ","");
         Serial.println("Authenticated Exit!!!");
-        Wifi.println("NSA-");
+        Wifi.println(toSend);
        }
        else{
         Wifi.println("NSF-");
@@ -244,8 +258,10 @@ boolean checkPresence(){
     Serial.println("Entrance"); 
  
     if(authenticated){
-        Serial.println("Authenticated Entrance!!!");
-         Wifi.println("NEA-");
+        String toSend = "NEA"+tag;
+         toSend.replace(" ","");
+        Serial.println("Authenticated Exit!!!");
+        Wifi.println(toSend);
        }
      else{
       Wifi.println("NEF-");
@@ -272,8 +288,10 @@ boolean checkPresence(){
     exited =true;
     Serial.println("Exit"); 
     if(authenticated){
+         String toSend = "NSA"+tag;
+          toSend.replace(" ","");
         Serial.println("Authenticated Exit!!!");
-        Wifi.println("NSA-");
+        Wifi.println(toSend);
        }
        else
        {
@@ -301,9 +319,10 @@ boolean checkPresence(){
     entrance =true;
     Serial.println("Entrance");
     if(authenticated){
-        Serial.println("Authenticated Entrance!!!");
-        
-         Wifi.println("NEA-");
+         String toSend = "NEA"+tag;
+        Serial.println("Authenticated Exit!!!");
+         toSend.replace(" ","");
+        Wifi.println(toSend);
        }
       else{
       Wifi.println("NEF-");
@@ -347,22 +366,94 @@ else{
 void process(WifiData Wifi) {
   // read the command
   String command = Wifi.readStringUntil('/');
+ int pin, value;
+
+  // Read pin number
 
   // is "digital" command?
-  if(command == "V")
+  if(command == "digital")
   {
-  
-    authenticateClient();  
-  }
-  if(command == "alarm"){
-    sendAlarmNotification();
+    //indice do comando
+    pin = Wifi.parseInt();
+     if(pin==0){
+      if (Wifi.read() == '/') {
+        value = Wifi.parseInt();
+        authenticateClient();  
+        }
+      
     }
-  if(command == "silenceMode")
-  {
-    silencedMode = !silencedMode;
-  //  Wifi.println("Silenced mode %b",silencedMode);  
+    if(pin == 1){
+       if (Wifi.read() == '/'){
+         value = Wifi.parseInt();
+         sendAlarmNotification();
+        }
+      }
+      if(pin == 2){
+         if (Wifi.read() == '/'){
+          value = Wifi.parseInt();
+          silencedMode = !silencedMode;
+          }
+        }
+      if(pin == 3){
+         if (Wifi.read() == '/'){
+          value = Wifi.parseInt();
+           while(addTag());
+          }
+          }
+      if(pin == 4){
+         if (Wifi.read() == '/'){
+          value = Wifi.parseInt();
+          sendOutputStatus();
+          }
+        }
+   Wifi.println("HTTP/1.1 200 OK\n");
   }
 }
+void sendOutputStatus(){
+  
+  }
+boolean addTag(){
+   if ( ! rfidSensor.PICC_IsNewCardPresent()) {
+   
+    return true;
+  }
+  // Select one of the cards
+  if ( ! rfidSensor.PICC_ReadCardSerial()) {
+
+    return true;
+  }
+  
+  //Show UID on serial monitor
+  Serial.print("UID tag :");
+ String content = "";
+  byte letter;
+  //Conversao da tag para algo que se possa ler no serial
+  for (byte i = 0; i < rfidSensor.uid.size; i++) {
+     Serial.print(rfidSensor.uid.uidByte[i] < 0x10 ? " 0" : " ");
+     Serial.print(rfidSensor.uid.uidByte[i], HEX);
+     content.concat(String(rfidSensor.uid.uidByte[i] < 0x10 ? " 0" : " "));
+     content.concat(String(rfidSensor.uid.uidByte[i], HEX));
+  }
+  Serial.println();
+  Serial.print("Message : ");
+  
+  content.toUpperCase();
+  content.trim();
+  Wifi.println(content.length());
+  char charc[12];
+  content.toCharArray(charc,12);
+  Wifi.print("NEW TAG ");
+  Wifi.println(charc);
+   tagMatrix[tagCounter] = content;
+   tagCounter++;
+   Wifi.println("Contents:");
+   for(int i = 0 ; i<tagCounter;i++){
+      Wifi.print(i);
+      Wifi.println(tagMatrix[i]);
+     
+    }
+   return false;
+  }
 void sendAlarmNotification(){
   Wifi.println("P----");
    Wifi.print(EOL);
