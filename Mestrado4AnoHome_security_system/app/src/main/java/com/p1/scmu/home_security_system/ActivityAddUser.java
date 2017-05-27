@@ -3,11 +3,8 @@ package com.p1.scmu.home_security_system;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -17,7 +14,7 @@ import android.widget.LinearLayout;
  * Created by Vanessa on 5/24/2017.
  */
 
-public class ActivityAddUser extends AppCompatActivity {
+public class ActivityAddUser extends ActivityUser {
 
     private static final int request_code =1;
     private TextInputLayout inputLayoutName, inputLayoutEmail, inputLayoutNumber;
@@ -58,63 +55,15 @@ public class ActivityAddUser extends AppCompatActivity {
         Log.i("ActivityRFIDReader", "Ready");
         Intent intent = new Intent(ActivityAddUser.this, ActivityRFIDReader.class);
         startActivityForResult(intent, request_code);
-
     }
 
 
-    private void submitForm(View view) {
-        if (!validateName()) return;
-        if (!validatePhoneNumber()) return;
-        if (!validateEmail()) return;
-
+    protected void submitForm(View view) {
+        super.submitForm();
         if(!readyToSubmit) startRFIDActivity(view);
         else createMember();
     }
 
-    private boolean validateName() {
-        if (inputName.getText().toString().trim().isEmpty()) {
-            inputLayoutName.setError(getString(R.string.err_msg_name));
-            requestFocus(inputName);
-            return false;
-        } else {
-            inputLayoutName.setErrorEnabled(false);
-        }
-        return true;
-    }
-
-    private boolean validatePhoneNumber() {
-        String text = inputNumber.getText().toString();
-        if (text.trim().isEmpty()) {
-            inputLayoutNumber.setError(getString(R.string.err_msg_number));
-            requestFocus(inputNumber);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean validateEmail() {
-        String email = inputEmail.getText().toString().trim();
-
-        if ((!email.isEmpty())&& (!isValidEmail(email))) {
-            inputLayoutEmail.setError(getString(R.string.err_msg_email));
-            requestFocus(inputEmail);
-            return false;
-        } else {
-            inputLayoutEmail.setErrorEnabled(false);
-        }
-
-        return true;
-    }
-
-    private static boolean isValidEmail(String email) {
-        return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
-    }
-
-    private void requestFocus(View view) {
-        if (view.requestFocus()) {
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        }
-    }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

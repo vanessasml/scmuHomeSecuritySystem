@@ -12,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -24,11 +25,19 @@ public class ActivityTabMembers extends Fragment{
 
     private MembersListAdapter membersAdapter;
     private View rootView;
+    private ImageButton userSettingsButton;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.tab_members, container, false);
 
+        /*membersAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView adapterView, View view, int position, long l) {
+                Member member = (Member) adapterView.getItemAtPosition(position);
+                startMemberSettingsActivity(member);
+            }
+        });*/
 
         FloatingActionButton btn_submit = (FloatingActionButton) rootView.findViewById(R.id.button_add_user);
         btn_submit.setOnClickListener(new View.OnClickListener() {
@@ -65,6 +74,12 @@ public class ActivityTabMembers extends Fragment{
         ArrayList<Member> members = new ArrayList<>(Arrays.asList(joao, maria));
         membersAdapter = new MembersListAdapter(rootView.getContext(), members);
         listView.setAdapter(membersAdapter);
+    }
+
+    private void startMemberSettingsActivity(Member member) {
+        Intent intent = new Intent(rootView.getContext(), ActivityUserSettings.class);
+        intent.putExtra("Member", member);
+        startActivityForResult(intent, 1);
     }
 
 }

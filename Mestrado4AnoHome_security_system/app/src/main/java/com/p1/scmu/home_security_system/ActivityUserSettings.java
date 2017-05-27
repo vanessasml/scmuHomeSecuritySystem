@@ -2,18 +2,18 @@ package com.p1.scmu.home_security_system;
 
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 /**
  * Created by Vanessa on 5/27/2017.
  */
 
-public class ActivityUserSettings extends AppCompatActivity {
+public class ActivityUserSettings extends ActivityUser {
 
         private static final int request_code =1;
         private TextInputLayout inputLayoutName, inputLayoutEmail, inputLayoutNumber;
@@ -45,7 +45,7 @@ public class ActivityUserSettings extends AppCompatActivity {
             btn_cancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    Toast.makeText(view.getContext(), "Changes canceled", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -53,9 +53,19 @@ public class ActivityUserSettings extends AppCompatActivity {
             btn_ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    submitForm();
                 }
             });
+        }
+
+        protected void submitForm(){
+            super.submitForm();
+            updateMember();
+        }
+
+        private void updateMember() {
+
+            Toast.makeText(this, "Changes canceled", Toast.LENGTH_SHORT).show();
         }
 
 }
