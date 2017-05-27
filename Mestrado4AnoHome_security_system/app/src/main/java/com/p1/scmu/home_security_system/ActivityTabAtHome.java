@@ -43,12 +43,12 @@ public class ActivityTabAtHome extends Fragment{
         Map<String, Calendar> datesJOAO = new HashMap<>();
         datesJOAO.put("Arrive",cl1);
         datesJOAO.put("Departure",cl2);
-        Member joao = new Member("Joao Miguel", "joao@miguel", 0, "91991", "", datesJOAO);
+        Member joao = new Member("Joao Miguel", "joao@miguel", 0, 91991, "", datesJOAO);
 
         Map<String, Calendar> datesMARIA = new HashMap<>();
         datesJOAO.put("Arrive",cl1);
         datesJOAO.put("Departure",cl2);
-        Member maria = new Member("Maria Miguel", "maria@miguel", 0, "91991", "", datesMARIA);
+        Member maria = new Member("Maria Miguel", "maria@miguel", 0, 91991, "", datesMARIA);
 
 
         ArrayList<Member> members = new ArrayList<>(Arrays.asList(joao, maria));

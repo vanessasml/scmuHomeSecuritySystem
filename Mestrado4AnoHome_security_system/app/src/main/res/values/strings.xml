@@ -2,7 +2,30 @@
     <string name="app_name">Home Security System</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
+
     <string name="section_tab1">MEMBERS</string>
     <string name="section_tab2">AT HOME</string>
     <string name="section_tab3">HISTORY</string>
+
+    <string name="add_next_step">Next</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_ok">Ok</string>
+    <string name="end_conf">Finish</string>
+    <string name="submit_rfid_value">Save RFID tag</string>
+
+    <string name="rfid_msg_alert">Place the card near the phone</string>
+    <string name="buton_toWrite">to Write</string>
+    <string name="button_toRead">to Read</string>
+
+    <string name="name_field">Name</string>
+    <string name="email_field">Email</string>
+    <string name="phone_field">Phone</string>
+    <string name="name_fild">Name</string>
+    <string name="err_msg_name">Insert valid name</string>
+    <string name="err_msg_email">Insert valid email</string>
+    <string name="err_msg_number">Insert valid phone number</string>
+    <string name="faq_customer_service">Customer Service</string>
+    <string name="title_activity_Add_User">Add Member</string>
+    <string name="title_associate_RFID_TAG">RFID association</string>
+    <string name="title_activity_User_Settings">Edit Member</string>
 </resources>

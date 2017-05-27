@@ -23,9 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ActivityMainMenu extends AppCompatActivity {
-
-
-
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -138,12 +135,12 @@ public class ActivityMainMenu extends AppCompatActivity {
             Map<String, Calendar> datesJOAO = new HashMap<>();
             datesJOAO.put("Arrive",cl1);
             datesJOAO.put("Departure",cl2);
-            Member joao = new Member("Joao Miguel", "joao@miguel", 0, "91991", "", datesJOAO);
+            Member joao = new Member("Joao Miguel", "joao@miguel", 0, 91991, "", datesJOAO);
 
             Map<String, Calendar> datesMARIA = new HashMap<>();
             datesJOAO.put("Arrive",cl1);
             datesJOAO.put("Departure",cl2);
-            Member maria = new Member("Maria Miguel", "maria@miguel", 0, "91991", "", datesMARIA);
+            Member maria = new Member("Maria Miguel", "maria@miguel", 0, 91991, "", datesMARIA);
 
 
             ListView listView = (ListView) rootView.findViewById(R.id.list_view_members);

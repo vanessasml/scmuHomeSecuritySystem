@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context="com.p1.scmu.home_security_system.ActivityRFIDReader"
+    android:weightSum="1">
+
+    <LinearLayout
+        android:id="@+id/context_layout"
+        android:layout_width="match_parent"
+        android:layout_height="131dp"
+        android:layout_weight="0.98"
+        android:orientation="vertical"
+        android:weightSum="1">
+
+        <TextView
+            android:id="@+id/alert_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center_horizontal|center"
+            android:layout_margin="10dp"
+            android:layout_weight="0.89"
+            android:allowUndo="false"
+            android:autoLink="web"
+            android:background="#efd9dddf"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/rfid_msg_alert"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+
+        <ToggleButton
+            android:id="@+id/toggleButtonRW"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="-70dp"
+            android:layout_weight="0.10"
+            android:background="@color/colorTab"
+            android:elevation="6dp"
+            android:onClick="tglReadWriteOnClick"
+            android:text="ToggleButton"
+            android:textOff="@string/buton_toWrite"
+            android:textOn="@string/button_toRead" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="124dp"
+        android:orientation="vertical"
+        android:weightSum="1"
+        android:layout_weight="0.02">
+
+        <EditText
+            android:id="@+id/info_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.51"
+            android:gravity="center_vertical|center_horizontal"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"
+            android:textColorLink="@color/colorPrimary"
+            android:textSize="8sp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button_end_config"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorTab"
+        android:backgroundTint="@color/colorTab"
+        android:text="@string/submit_rfid_value"
+        app:srcCompat="@color/colorTab" />
+
+</LinearLayout>

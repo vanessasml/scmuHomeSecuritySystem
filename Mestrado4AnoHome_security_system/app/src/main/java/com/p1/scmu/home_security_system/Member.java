@@ -16,14 +16,14 @@ public class Member implements Parcelable{
     public String fullName;
     public String email;
     public long imageUrl;
-    public String mobile;
+    public int mobile;
     public Map<String, Calendar> arrivesDepartures;
 
     public String id; // identify user
 
     public Member() { }
 
-    public Member(String fullName, String email, long imageUrl, String mobile, String id) {
+    public Member(String fullName, String email, long imageUrl, int mobile, String id) {
         this.fullName = fullName;
         this.email = email;
         this.imageUrl = imageUrl;
@@ -31,7 +31,7 @@ public class Member implements Parcelable{
         this.id = id;
     }
 
-    public Member(String fullName, String email, long imageUrl, String mobile, String id, Map<String, Calendar> dates) {
+    public Member(String fullName, String email, long imageUrl, int mobile, String id, Map<String, Calendar> dates) {
         this.fullName = fullName;
         this.email = email;
         this.imageUrl = imageUrl;
@@ -45,7 +45,7 @@ public class Member implements Parcelable{
         fullName = in.readString();
         email = in.readString();
         imageUrl = in.readLong();
-        mobile = in.readString();
+        mobile = in.readInt();
 
         Map<String, Calendar> map = new HashMap<>();
         in.readMap(map, Map.class.getClassLoader());
@@ -59,7 +59,7 @@ public class Member implements Parcelable{
         parcel.writeString(fullName);
         parcel.writeString(email);
         parcel.writeLong(imageUrl);
-        parcel.writeString(mobile);
+        parcel.writeInt(mobile);
 
         if (arrivesDepartures != null) {
             Map<String, Calendar> map = new HashMap<>();
@@ -99,7 +99,7 @@ public class Member implements Parcelable{
         fullName = (String)json.get("full_name");
         email = (String)json.get("email");
         imageUrl = (Long)json.get("image_url");
-        mobile = (String)json.get("mobile");
+        mobile = (int)json.get("mobile");
         arrivesDepartures = (Map<String, Calendar>)json.get("arrivesDepartures");
     }
 
