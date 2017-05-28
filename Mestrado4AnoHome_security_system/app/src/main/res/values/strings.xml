@@ -28,4 +28,11 @@
     <string name="title_activity_Add_User">Add Member</string>
     <string name="title_associate_RFID_TAG">RFID association</string>
     <string name="title_activity_User_Settings">Edit Member</string>
+    <string name="settings_auth">Autenticate</string>
+    <string name="Alarm_mode_on">Alarm mode ON</string>
+    <string name="Alarm_mode_off">Alarm mode OFF</string>
+    <string name="Silent_mode_on">Silent mode on</string>
+    <string name="Silent_mode_off">Silent mode OFF</string>
+    <string name="title_activity_Settings">Edit Settings</string>
+    <string name="button_user_profile">Your Profile</string>
 </resources>

@@ -6,4 +6,5 @@
     <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="item_left_margin">10dp</dimen>
     <dimen name="margin_separate_list_items">10dp</dimen>
+    <dimen name="bottom_auth_button">50dp</dimen>
 </resources>

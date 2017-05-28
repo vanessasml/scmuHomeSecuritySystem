@@ -41,6 +41,12 @@
             android:screenOrientation="portrait">
         </activity>
         <activity
+            android:name=".ActivitySettings"
+            android:label="@string/title_activity_Settings"
+            android:parentActivityName=".ActivityMainMenu"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
             android:name=".ActivityRFIDReader"
             android:label="@string/title_associate_RFID_TAG"
             android:parentActivityName=".ActivityAddUser"

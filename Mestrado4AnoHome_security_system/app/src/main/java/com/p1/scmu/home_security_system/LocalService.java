@@ -44,11 +44,12 @@ import java.util.List;
 public class LocalService extends Service {
 
     private static final String URL = "http://localhost:8000/";
-    private static final String GET_MEMBERSI = "";
-    private static final String GET_MEMBERSIO = "";
-    private static final String GET_MEMBERS = "";
-    private static final String INSERT_MEMBER = "";
-    private static final String DELETE_MEMBER = "";
+    public static final String GET_MEMBERSI = "";
+    public static final String GET_MEMBERSIO = "";
+    public static final String GET_MEMBERS = "";
+    public static final String INSERT_MEMBER = "";
+    public static final String DELETE_MEMBER = "";
+    public static final String INSERT_SETTINGS = "";
     private static final String URL_REQUEST_MEMBERS_LIST =URL+GET_MEMBERSI;
     private static final String URL_REQUEST_MEMBERS_VI =URL+GET_MEMBERSIO;
     private static final String URL_REQUEST_MEMBERS =URL+ GET_MEMBERS; //POST OU DELETE...
@@ -199,7 +200,36 @@ public class LocalService extends Service {
                 }
             });
         } catch (JSONException e) {
-            Log.e("sendResponse", "Error parsing to json");
+            Log.e("sendResponse", "Error parsing Member to json");
+            e.printStackTrace();
+        }
+    }
+
+    //may be POST or DELETE
+    public void sendSettings(Settings s, int method, String path) {
+        try {
+
+            JSONObject jsonBody = s.asJSON();
+            JsonObjectRequest jsonObjReq = new JsonObjectRequest(
+                    method, new String(URL+path), jsonBody,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Log.d(TAG, response.toString());
+
+                            //msgResponse.setText(response.toString());
+
+                        }
+                    }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    VolleyLog.d(TAG, "Error: " + error.getMessage());
+
+                }
+            });
+        } catch (JSONException e) {
+            Log.e("sendResponse", "Error parsing Settings to json");
             e.printStackTrace();
         }
     }

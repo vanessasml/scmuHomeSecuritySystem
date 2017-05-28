@@ -31,8 +31,9 @@ import java.util.List;
 public class ActivityMainMenu extends AppCompatActivity {
 
     private final static String TAG = ActivityMainMenu.class.getSimpleName();
-    private static final String INSERT_MEMBER = "";
-    private static final String DELETE_MEMBER = "";
+    private static int request_code_settings = 1;
+    private static int request_code_user_settings=2;
+    private final static String MEMBER = "Member";
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -43,8 +44,6 @@ public class ActivityMainMenu extends AppCompatActivity {
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private LocalService localService;
-
-
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -52,13 +51,15 @@ public class ActivityMainMenu extends AppCompatActivity {
     protected List<Member> memberListI;
     protected List<Member> memberListIO;
     protected List<Member> memberList;
-    private int[] imageResId={R.mipmap.icon_members,
-            R.mipmap.icon_at_home,
-            R.mipmap.icon_history};
-
+    protected Member appOwner;
+    private Settings currSettings;
     private WifiManager wifi;
     private LocalService.LocalBinder mBoundService;
     private boolean mIsBound;
+
+    private int[] imageResId={R.mipmap.icon_members,
+            R.mipmap.icon_at_home,
+            R.mipmap.icon_history};
 
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -153,7 +154,7 @@ public class ActivityMainMenu extends AppCompatActivity {
     }
 
     public void sendToInsertMemberToServer(Member m){
-        localService.sendResponse(m, Request.Method.GET, INSERT_MEMBER);
+        localService.sendResponse(m, Request.Method.POST, LocalService.INSERT_MEMBER);
     }
 
     @Override
@@ -172,10 +173,52 @@ public class ActivityMainMenu extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            startSettingsActivity(appOwner.rfid);
             return true;
+        }else if(id== R.id.action_user_profile){
+            startUserSettingsActivity(appOwner);
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.i("ActivitySettings", "receivingDataInMainActivity");
+        if (requestCode == request_code_settings) {
+            if (resultCode == RESULT_OK) {
+                Log.i("ActivitySettings", "guardando");
+                Settings settings = (Settings) data.getExtras().get(ActivitySettings.SETTINGS);
+                currSettings = settings;
+                sendSettingsToServer(settings);
+            }
+        }else if(requestCode == request_code_user_settings){
+            if(resultCode == RESULT_OK) {
+                Log.i("ActivityAddUser", "guardando");
+                Member member = (Member) data.getExtras().get(ActivityAddUser.MEMBER);
+                int index = memberList.indexOf(appOwner);
+                memberList.add(index, member);
+                memberList.remove(appOwner);
+                appOwner=member;
+                sendToInsertMemberToServer(member);
+            }
+        }
+    }
+
+    private void sendSettingsToServer(Settings settings) {
+        localService.sendSettings(settings, Request.Method.POST, LocalService.INSERT_SETTINGS);
+    }
+
+    private void startSettingsActivity(String auth) {
+        Intent intent = new Intent(this, ActivitySettings.class);
+        intent.putExtra(ActivitySettings.PREVIOUS_SETTINGS, currSettings);
+        startActivityForResult(intent, request_code_settings);
+    }
+
+    private void startUserSettingsActivity(Member member) {
+        Intent intent = new Intent(this, ActivityUserSettings.class);
+        intent.putExtra(MEMBER, member);
+        startActivityForResult(intent, request_code_user_settings);
     }
 
     /**
