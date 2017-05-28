@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -52,6 +53,7 @@ public class ActivityMainMenu extends AppCompatActivity {
             R.mipmap.icon_at_home,
             R.mipmap.icon_history};
 
+    private WifiManager wifi;
     private LocalService.LocalBinder mBoundService;
     private boolean mIsBound;
 
@@ -107,6 +109,8 @@ public class ActivityMainMenu extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
+        enableWifiService();
+
         if(!localService.isRunning){
             Intent intent = new Intent(this, LocalService.class);
             startService(intent);
@@ -114,7 +118,6 @@ public class ActivityMainMenu extends AppCompatActivity {
 
         memberListI = localService.getMembersAtHome();
         memberListIO = localService.getAllMembersHistory();
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -133,6 +136,11 @@ public class ActivityMainMenu extends AppCompatActivity {
         tabLayout.getTabAt(1).setIcon(imageResId[1]);
         tabLayout.getTabAt(2).setIcon(imageResId[2]);
 
+    }
+
+    private void enableWifiService(){
+        wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        wifi.setWifiEnabled(true);
     }
 
     @Override
