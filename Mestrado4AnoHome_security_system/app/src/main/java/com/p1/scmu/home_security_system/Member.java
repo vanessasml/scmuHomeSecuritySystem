@@ -4,6 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -108,6 +111,22 @@ public class Member implements Parcelable{
                 e.printStackTrace(); }
         }
 
+    }
+
+    public void getMemberFromJSON(JsonObject json) throws JSONException {
+        if (json == null)
+            return;
+
+        fullName = json.get("Name").getAsString();
+        email = json.get("Email").getAsString();
+        mobile = json.get("Number").getAsInt();
+        rfid = json.get("RFID").getAsString();
+
+        JsonArray jArrayDates = json.getAsJsonArray("Dates");
+        for (int j = 0; j < json.size(); j++) {
+            arrivesDepartures.add(jArrayDates.get(j).toString());
+            //Log.e("JsonArray", "JsonArray dates invalid");
+        }
     }
 
     public JSONObject asJSON() throws JSONException {
