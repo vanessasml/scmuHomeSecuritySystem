@@ -25,7 +25,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.List;
-import java.util.Map;
 
 public class ActivityMainMenu extends AppCompatActivity {
 
@@ -48,7 +47,7 @@ public class ActivityMainMenu extends AppCompatActivity {
     private ViewPager mViewPager;
     protected List<Member> memberListI;
     protected List<Member> memberListIO;
-    protected Map<String, Member> memberList;
+    protected List<Member> memberList;
     private int[] imageResId={R.mipmap.icon_members,
             R.mipmap.icon_at_home,
             R.mipmap.icon_history};

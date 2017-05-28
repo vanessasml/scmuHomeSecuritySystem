@@ -73,7 +73,7 @@ public class ActivityTabMembers extends Fragment{
             if(resultCode == RESULT_OK) {
                 Log.i("ActivityAddUser", "guardando");
                 Member member = (Member) data.getExtras().get(ActivityAddUser.MEMBER);
-                activityMainMenu.memberList.put(member.rfid, member);
+                activityMainMenu.memberList.add(member);
             }
         }else if(requestCode==request_code_update_member){
             if(resultCode == RESULT_OK) {
@@ -81,7 +81,7 @@ public class ActivityTabMembers extends Fragment{
                 Member updated = (Member) data.getExtras().get(ActivityUserSettings.UPDATE_MEMBER);
                 activityMainMenu.memberList.remove(toUpdate.rfid);
                 toUpdate = null;
-                activityMainMenu.memberList.put(updated.rfid, updated);
+                activityMainMenu.memberList.add(updated);
             }
         }
     }

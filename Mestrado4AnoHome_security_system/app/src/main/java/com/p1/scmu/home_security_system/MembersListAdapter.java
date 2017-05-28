@@ -4,49 +4,28 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * Created by Vanessa on 5/23/2017.
  */
 
-public class MembersListAdapter extends BaseAdapter {
+public class MembersListAdapter extends ArrayAdapter<Member> {
 
-    private Map<String, Member> mData = new HashMap();
-    private Context context;
-    public MembersListAdapter(Context context, Map<String, Member> members) {
-        this.context = context;
-        mData=members;
-    }
+    public MembersListAdapter(Context context, List<Member> members) { super(context, 0, members); }
 
-    @Override
-    public int getCount() {
-        return mData.size();
-    }
-
-    @Override
-    public Object getItem(int i) {
-        return mData.get(i);
-    }
-
-    @Override
-    public long getItemId(int i) {
-        return 0;
-    }
-
-    @Override
+       @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
         Member member = (Member) getItem(position);
 
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.list_view_item, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_view_item, parent, false);
         }
         TextView userName = (TextView) convertView.findViewById(R.id.user_name);
         userName.setText(member.fullName);
