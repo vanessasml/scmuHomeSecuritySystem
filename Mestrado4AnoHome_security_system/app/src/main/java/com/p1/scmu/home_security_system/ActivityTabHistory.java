@@ -33,6 +33,7 @@ public class ActivityTabHistory extends Fragment{
 
         ListView listView = (ListView) rootView.findViewById(R.id.list_history_users);
 
+        activityMainMenu.refreshMembersLists();
         membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberListIO);
         listView.setAdapter(membersAdapter);
 

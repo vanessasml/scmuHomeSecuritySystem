@@ -53,6 +53,7 @@ public class ActivityTabMembers extends Fragment{
 
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_members);
 
+        activityMainMenu.refreshMembersLists();
         membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberList);
         listView.setAdapter(membersAdapter);
 
@@ -74,6 +75,7 @@ public class ActivityTabMembers extends Fragment{
                 Log.i("ActivityAddUser", "guardando");
                 Member member = (Member) data.getExtras().get(ActivityAddUser.MEMBER);
                 activityMainMenu.memberList.add(member);
+                activityMainMenu.sendToInsertMemberToServer(member);
             }
         }else if(requestCode==request_code_update_member){
             if(resultCode == RESULT_OK) {
@@ -82,6 +84,7 @@ public class ActivityTabMembers extends Fragment{
                 activityMainMenu.memberList.remove(toUpdate.rfid);
                 toUpdate = null;
                 activityMainMenu.memberList.add(updated);
+                activityMainMenu.sendToInsertMemberToServer(updated);
             }
         }
     }

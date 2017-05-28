@@ -24,11 +24,15 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+
 import java.util.List;
 
 public class ActivityMainMenu extends AppCompatActivity {
 
     private final static String TAG = ActivityMainMenu.class.getSimpleName();
+    private static final String INSERT_MEMBER = "";
+    private static final String DELETE_MEMBER = "";
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -115,8 +119,8 @@ public class ActivityMainMenu extends AppCompatActivity {
             startService(intent);
         }
 
-        memberListI = localService.getMembersAtHome();
-        memberListIO = localService.getAllMembersHistory();
+        localService.SendRequest();
+        refreshMembersLists();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -137,9 +141,19 @@ public class ActivityMainMenu extends AppCompatActivity {
 
     }
 
+    public void refreshMembersLists(){
+        memberList = localService.getMembers();
+        memberListI = localService.getMembersAtHome();
+        memberListIO = localService.getAllMembersHistory();
+    }
+
     private void enableWifiService(){
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         wifi.setWifiEnabled(true);
+    }
+
+    public void sendToInsertMemberToServer(Member m){
+        localService.sendResponse(m, Request.Method.GET, INSERT_MEMBER);
     }
 
     @Override

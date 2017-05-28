@@ -123,15 +123,12 @@ public class LocalService extends Service {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
-
     }
-
 
     public void SendRequest()
     {
         reQueue = Volley.newRequestQueue(this);
+        allMembers = sendRequestToMembersList(URL_REQUEST_MEMBERS);
         membersI = sendRequestToMembersList(URL_REQUEST_MEMBERS_LIST);
         membersIO = sendRequestToMembersList(URL_REQUEST_MEMBERS_VI);
     }
@@ -168,6 +165,8 @@ public class LocalService extends Service {
         return members;
     }
 
+    public List<Member> getMembers(){ return allMembers; }
+
     public List<Member> getMembersAtHome(){
         return membersI;
     }
@@ -177,12 +176,12 @@ public class LocalService extends Service {
     }
 
     //may be POST or DELETE
-    public void sendResponse(Member m, int method, String url) {
+    public void sendResponse(Member m, int method, String path) {
         try {
 
             JSONObject jsonBody = m.asJSON();
             JsonObjectRequest jsonObjReq = new JsonObjectRequest(
-                    method, url, jsonBody,
+                    method, new String(URL+path), jsonBody,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {

@@ -33,6 +33,7 @@ public class ActivityTabAtHome extends Fragment{
 
         ListView listView = (ListView) rootView.findViewById(R.id.list_at_home_users);
 
+        activityMainMenu.refreshMembersLists();
         membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberListI);
         listView.setAdapter(membersAdapter);
 
