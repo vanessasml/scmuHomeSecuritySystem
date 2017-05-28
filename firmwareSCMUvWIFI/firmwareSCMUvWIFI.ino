@@ -422,9 +422,9 @@ void process(WifiData Wifi) {
 }
 void sendOutputStatus(){
           Wifi.println("HTTP/1.1 200 OK\n");
-          Wifi.print(F("PassageIndex:"));
+       //   Wifi.print(F("PassageIndex:"));
           Wifi.print(entrancesCounter);
-          Wifi.print(F("PassageValue:"));
+          Wifi.print(F("_"));
           Wifi.println(latestPassage);
           Wifi.print(EOL);
   }
