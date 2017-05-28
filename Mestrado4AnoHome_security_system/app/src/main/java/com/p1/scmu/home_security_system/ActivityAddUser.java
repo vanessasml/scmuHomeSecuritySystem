@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -16,14 +17,19 @@ import android.widget.LinearLayout;
 
 public class ActivityAddUser extends ActivityUser {
 
-    private static final int request_code =1;
+    private static final int request_code_rfid =1;
+    private static final int request_code_add_user =2;
+    public static final String MEMBER = "Member";
+
     private TextInputLayout inputLayoutName, inputLayoutEmail, inputLayoutNumber;
     private LinearLayout inputLayoutRFID;
     private EditText inputName, inputEmail, inputNumber, inputRFID;
     private ImageView inputImage;
     private Button btn_submit;
+    private ImageButton btn_rfid;
     private boolean readyToSubmit=false;
         private boolean alreadyCreating = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +48,15 @@ public class ActivityAddUser extends ActivityUser {
         inputRFID = (EditText) findViewById(R.id.rfid_field);
         inputImage = (ImageView) findViewById(R.id.img_user);
 
+
+        btn_rfid = (ImageButton) findViewById(R.id.rfid_add_user_button);
+        btn_rfid.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startRFIDActivity(view);
+            }
+        });
+
         btn_submit = (Button) findViewById(R.id.button_next_rfid);
         btn_submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,7 +69,7 @@ public class ActivityAddUser extends ActivityUser {
     public void startRFIDActivity(View view) {
         Log.i("ActivityRFIDReader", "Ready");
         Intent intent = new Intent(ActivityAddUser.this, ActivityRFIDReader.class);
-        startActivityForResult(intent, request_code);
+        startActivityForResult(intent, request_code_rfid);
     }
 
 
@@ -68,7 +83,7 @@ public class ActivityAddUser extends ActivityUser {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.i("ActivityRFIDReader", "onActivity");
-        if (requestCode == request_code){
+        if (requestCode == request_code_rfid){
             if(resultCode == RESULT_OK) {
                 Log.i("ActivityRFIDReader", "guardando");
                 String dataString = data.getExtras().getString(ActivityRFIDReader.CONTENT);
@@ -77,6 +92,7 @@ public class ActivityAddUser extends ActivityUser {
                 inputLayoutRFID.setVisibility(View.VISIBLE);
                 btn_submit.setText("FINISH");
                 readyToSubmit = true;
+
             }
         }
     }
@@ -92,17 +108,15 @@ public class ActivityAddUser extends ActivityUser {
         int phone = Integer.parseInt(inputNumber.getText().toString());
         String rfidString = inputRFID.getText().toString().trim();
 
-        int icon = (Integer)inputEmail.getTag();
+        Member member = new Member(name, email, phone, rfidString);
 
-        if (icon == 0)
-            icon = 0;
+        Log.i("atButton", "sendingData");
 
-        //Map<String, Object> members = new HashMap<>();
+        Intent i = new Intent();
+        i.putExtra(MEMBER, member);
+        setResult(RESULT_OK, i);
 
-        Member member = new Member(name, email, icon, phone, rfidString);
-
-        //send to server new member
-        //member.asJSON();
+        finish();
 
     }
 

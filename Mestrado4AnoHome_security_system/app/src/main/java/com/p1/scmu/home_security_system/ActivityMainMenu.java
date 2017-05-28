@@ -1,6 +1,11 @@
 package com.p1.scmu.home_security_system;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -9,20 +14,21 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ActivityMainMenu extends AppCompatActivity {
+
+    private final static String TAG = ActivityMainMenu.class.getSimpleName();
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -32,18 +38,83 @@ public class ActivityMainMenu extends AppCompatActivity {
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    private LocalService localService;
+
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    protected List<Member> memberListI;
+    protected List<Member> memberListIO;
+    protected Map<String, Member> memberList;
     private int[] imageResId={R.mipmap.icon_members,
             R.mipmap.icon_at_home,
             R.mipmap.icon_history};
+
+    private LocalService.LocalBinder mBoundService;
+    private boolean mIsBound;
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // This is called when the connection with the service has been
+            // established, giving us the service object we can use to
+            // interact with the service.  Because we have bound to a explicit
+            // service that we know is running in our own process, we can
+            // cast its IBinder to a concrete class and directly access it.
+            mBoundService = (LocalService.LocalBinder)service;
+            int statusCode = mBoundService.getStatusCode();
+            Log.d("Binding.java","called onServiceConnected. statusCode: " + statusCode);
+
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            // This is called when the connection with the service has been
+            // unexpectedly disconnected -- that is, its process crashed.
+            // Because it is running in our same process, we should never
+            // see this happen.
+            mBoundService = null;
+            Log.d("Binding", "called onServiceDisconnected");
+
+        }
+    };
+
+    void doBindService() {
+        // Establish a connection with the service.  We use an explicit
+        // class name because we want a specific service implementation that
+        // we know will be running in our own process (and thus won't be
+        // supporting component replacement by other applications).
+        bindService(new Intent(this, LocalService.class), mConnection, Context.BIND_AUTO_CREATE);
+        Toast.makeText(this, "Connected from service", Toast.LENGTH_SHORT).show();
+        mIsBound = true;
+    }
+
+    void doUnbindService() {
+        if (mIsBound) {
+            int statusCode = mBoundService.getStatusCode();
+            if (statusCode != 0) Log.d("doUnbindService", "Binding.java statusCode: " + statusCode);
+
+            // Tell the user we did an unbind
+            Toast.makeText(this, "Disconnected from service", Toast.LENGTH_SHORT).show();
+
+            // Detach our existing connection.
+            unbindService(mConnection);
+            mIsBound = false;
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+
+        if(!localService.isRunning){
+            Intent intent = new Intent(this, LocalService.class);
+            startService(intent);
+        }
+
+        memberListI = localService.getMembersAtHome();
+        memberListIO = localService.getAllMembersHistory();
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -63,7 +134,6 @@ public class ActivityMainMenu extends AppCompatActivity {
         tabLayout.getTabAt(2).setIcon(imageResId[2]);
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -99,6 +169,7 @@ public class ActivityMainMenu extends AppCompatActivity {
 
         private MembersListAdapter membersAdapter;
         private View rootView;
+        private ActivityMainMenu activityMainMenu;
 
         public PlaceholderFragment() {
         }
@@ -119,7 +190,7 @@ public class ActivityMainMenu extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             rootView = inflater.inflate(R.layout.tab_members, container, false);
-
+            activityMainMenu = (ActivityMainMenu) getActivity();
             return rootView;
         }
 
@@ -127,25 +198,8 @@ public class ActivityMainMenu extends AppCompatActivity {
         public void onActivityCreated(@Nullable Bundle savedInstanceState){
             super.onActivityCreated(savedInstanceState);
 
-            Calendar cl1 = Calendar.getInstance();
-            cl1.set(2017, 02, 01, 10, 05);
-
-            Calendar cl2 = Calendar.getInstance();
-            cl2.set(2017, 02, 01, 11, 30);
-            Map<String, Calendar> datesJOAO = new HashMap<>();
-            datesJOAO.put("Arrive",cl1);
-            datesJOAO.put("Departure",cl2);
-            Member joao = new Member("Joao Miguel", "joao@miguel", 0, 91991, "", datesJOAO);
-
-            Map<String, Calendar> datesMARIA = new HashMap<>();
-            datesJOAO.put("Arrive",cl1);
-            datesJOAO.put("Departure",cl2);
-            Member maria = new Member("Maria Miguel", "maria@miguel", 0, 91991, "", datesMARIA);
-
-
             ListView listView = (ListView) rootView.findViewById(R.id.list_view_members);
-            ArrayList<Member> members = new ArrayList<>(Arrays.asList(joao, maria));
-            membersAdapter = new MembersListAdapter(rootView.getContext(), members);
+            membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberList);
             listView.setAdapter(membersAdapter);
         }
     }

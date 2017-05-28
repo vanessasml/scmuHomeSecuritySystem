@@ -2,10 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.p1.scmu.home_security_system">
 
+    <service android:name="com.p1.scmu.home_security_system.LocalService"></service>
     <uses-permission
         android:name="android.permission.NFC" />
     <uses-permission
         android:name="android.permission.INTERNET"/>
+    <uses-permission
+        android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <uses-feature android:name="android.hardware.nfc"
         android:required="true"/>

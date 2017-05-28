@@ -2,10 +2,14 @@ package com.p1.scmu.home_security_system;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Vanessa on 5/23/2017.
@@ -15,63 +19,57 @@ public class Member implements Parcelable{
 
     public String fullName;
     public String email;
-    public long imageUrl;
+    public String rfid;
     public int mobile;
-    public Map<String, Calendar> arrivesDepartures;
+    public List<String> arrivesDepartures;
 
     public String id; // identify user
 
     public Member() { }
 
-    public Member(String fullName, String email, long imageUrl, int mobile, String id) {
+    public Member(String fullName, String email, int mobile, String rfid) {
         this.fullName = fullName;
         this.email = email;
-        this.imageUrl = imageUrl;
         this.mobile = mobile;
-        this.id = id;
+        this.rfid = rfid;
     }
 
-    public Member(String fullName, String email, long imageUrl, int mobile, String id, Map<String, Calendar> dates) {
+    public Member(String fullName, String email, int mobile, String rfid, List<String> dates) {
         this.fullName = fullName;
         this.email = email;
-        this.imageUrl = imageUrl;
         this.mobile = mobile;
-        this.id = id;
+        this.rfid = rfid;
         this.arrivesDepartures = dates;
     }
 
     protected Member(Parcel in) {
-        id = in.readString();
+
         fullName = in.readString();
         email = in.readString();
-        imageUrl = in.readLong();
         mobile = in.readInt();
+        rfid = in.readString();
 
-        Map<String, Calendar> map = new HashMap<>();
-        in.readMap(map, Map.class.getClassLoader());
-        if (map.size() > 0)
-            arrivesDepartures = new HashMap<>(map);
+        List<String> dates  = new ArrayList<>();
+        in.readList(dates, List.class.getClassLoader());
+        if (dates.size() > 0)
+            arrivesDepartures = new ArrayList<>(dates);
     }
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
+
         parcel.writeString(fullName);
         parcel.writeString(email);
-        parcel.writeLong(imageUrl);
         parcel.writeInt(mobile);
+        parcel.writeString(id);
 
         if (arrivesDepartures != null) {
-            Map<String, Calendar> map = new HashMap<>();
-            for(Map.Entry<String, Calendar> entry : map.entrySet()) {
-                String key = entry.getKey();
-                Calendar value = entry.getValue();
+            List<String> dates = new ArrayList<>();
+            for(String entry : dates) arrivesDepartures.add(entry);
 
-                arrivesDepartures.put(key, value);
-            }
-            parcel.writeMap(map);
+            parcel.writeList(arrivesDepartures);
         } else {
-            parcel.writeMap(null);
+            parcel.writeList(null);
         }
     }
 
@@ -92,24 +90,33 @@ public class Member implements Parcelable{
         return 0;
     }
 
-    public void upCalendarFromJSON(Map<String, Object> json) {
+    public void getMemberFromJSON(JSONObject json) throws JSONException {
         if (json == null)
             return;
 
-        fullName = (String)json.get("full_name");
-        email = (String)json.get("email");
-        imageUrl = (Long)json.get("image_url");
-        mobile = (int)json.get("mobile");
-        arrivesDepartures = (Map<String, Calendar>)json.get("arrivesDepartures");
+        fullName = (String)json.get("Name");
+        email = (String)json.get("Email");
+        mobile = (int)json.get("Number");
+        rfid = (String)json.get("RFID");
+
+        JSONArray jArrayDates = json.getJSONArray("Dates");
+        for (int j = 0; j < json.length(); j++) {
+            try {
+                arrivesDepartures.add(jArrayDates.get(j).toString());
+            } catch (JSONException e) {
+                Log.e("JsonArray", "JsonArray dates invalid");
+                e.printStackTrace(); }
+        }
+
     }
 
-    public Map<String, Object> asJSON() {
-        return new HashMap<String, Object>() {{
-            put("full_name", fullName);
-            put("email", email);
-            put("image_url", imageUrl);
-            put("mobile", mobile);
-            put("goals", arrivesDepartures);
+    public JSONObject asJSON() throws JSONException {
+        return new JSONObject() {{
+            put("Name", fullName);
+            put("Email", email);
+            put("Number", mobile);
+            put("RFID", rfid);
+            put("Dates", new JSONArray(arrivesDepartures));
         }};
     }
 }

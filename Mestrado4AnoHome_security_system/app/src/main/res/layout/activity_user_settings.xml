@@ -140,17 +140,18 @@
                 android:id="@+id/settings_img_user_rfid"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:srcCompat="@mipmap/icon_rfid_2" />
+                app:srcCompat="@mipmap/icon_rfid_2"
+                android:layout_weight="44910.17" />
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/settings_text_input_rfid"
-                android:layout_width="275dp"
-                android:layout_height="match_parent">
+                android:layout_width="226dp"
+                android:layout_height="match_parent"
+                android:weightSum="1">
 
                 <EditText
                     android:id="@+id/settings_rfid_field"
-                    android:layout_width="match_parent"
+                    android:layout_width="229dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:hint="RFID"
@@ -159,6 +160,15 @@
                     android:textColorHint="@color/colorPrimary"
                     android:textColorLink="@color/colorPrimary" />
             </android.support.design.widget.TextInputLayout>
+
+            <ImageButton
+                android:id="@+id/rfid_change_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="14773.96"
+                android:background="@android:color/transparent"
+                android:elevation="11dp"
+                app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
 
         </LinearLayout>
 

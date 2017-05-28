@@ -9,42 +9,39 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import static android.app.Activity.RESULT_OK;
 
 public class ActivityTabMembers extends Fragment{
+
+    private static final int request_code_add_member = 2;
+    private static final int request_code_update_member = 3;
 
     private MembersListAdapter membersAdapter;
     private View rootView;
     private ImageButton userSettingsButton;
+    private ActivityMainMenu activityMainMenu;
+    private Member toUpdate;
+
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.tab_members, container, false);
-
-        /*membersAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView adapterView, View view, int position, long l) {
-                Member member = (Member) adapterView.getItemAtPosition(position);
-                startMemberSettingsActivity(member);
-            }
-        });*/
+        activityMainMenu = (ActivityMainMenu) getActivity();
 
         FloatingActionButton btn_submit = (FloatingActionButton) rootView.findViewById(R.id.button_add_user);
         btn_submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), ActivityAddUser.class);
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, request_code_add_member);
             }
         });
         return rootView;
@@ -56,30 +53,43 @@ public class ActivityTabMembers extends Fragment{
 
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_members);
 
-        Calendar cl1 = Calendar.getInstance();
-        cl1.set(2017, 02, 01, 10, 05);
-
-        Calendar cl2 = Calendar.getInstance();
-        cl2.set(2017, 02, 01, 11, 30);
-        Map<String, Calendar> datesJOAO = new HashMap<>();
-        datesJOAO.put("Arrive",cl1);
-        datesJOAO.put("Departure",cl2);
-        Member joao = new Member("Joao Miguel", "joao@miguel", 0, 91991, "", datesJOAO);
-
-        Map<String, Calendar> datesMARIA = new HashMap<>();
-        datesJOAO.put("Arrive",cl1);
-        datesJOAO.put("Departure",cl2);
-        Member maria = new Member("Maria Miguel", "maria@miguel", 0, 91991, "", datesMARIA);
-
-        ArrayList<Member> members = new ArrayList<>(Arrays.asList(joao, maria));
-        membersAdapter = new MembersListAdapter(rootView.getContext(), members);
+        membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberList);
         listView.setAdapter(membersAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView adapterView, View view, int position, long l) {
+                Member member = (Member) adapterView.getItemAtPosition(position);
+                toUpdate = member;
+                startMemberSettingsActivity(member);
+            }
+        });
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.i("ActivityRFIDReader", "onActivity");
+        if (requestCode == request_code_add_member){
+            if(resultCode == RESULT_OK) {
+                Log.i("ActivityAddUser", "guardando");
+                Member member = (Member) data.getExtras().get(ActivityAddUser.MEMBER);
+                activityMainMenu.memberList.put(member.rfid, member);
+            }
+        }else if(requestCode==request_code_update_member){
+            if(resultCode == RESULT_OK) {
+                Log.i("ActivityAddUser", "guardando");
+                Member updated = (Member) data.getExtras().get(ActivityUserSettings.UPDATE_MEMBER);
+                activityMainMenu.memberList.remove(toUpdate.rfid);
+                toUpdate = null;
+                activityMainMenu.memberList.put(updated.rfid, updated);
+            }
+        }
     }
 
     private void startMemberSettingsActivity(Member member) {
         Intent intent = new Intent(rootView.getContext(), ActivityUserSettings.class);
         intent.putExtra("Member", member);
-        startActivityForResult(intent, 1);
+        startActivityForResult(intent, request_code_update_member);
     }
 
 }

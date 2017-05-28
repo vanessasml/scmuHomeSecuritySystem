@@ -1,18 +1,14 @@
 package com.p1.scmu.home_security_system;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Vanessa on 5/22/2017.
@@ -22,10 +18,12 @@ public class ActivityTabHistory extends Fragment{
 
     private MembersListAdapter membersAdapter;
     private View rootView;
+    private ActivityMainMenu activityMainMenu;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.tab_history, container, false);
+        activityMainMenu = (ActivityMainMenu) getActivity();
         return rootView;
     }
 
@@ -35,25 +33,23 @@ public class ActivityTabHistory extends Fragment{
 
         ListView listView = (ListView) rootView.findViewById(R.id.list_history_users);
 
-        Calendar cl1 = Calendar.getInstance();
-        cl1.set(2017, 02, 01, 10, 05);
-
-        Calendar cl2 = Calendar.getInstance();
-        cl2.set(2017, 02, 01, 11, 30);
-        Map<String, Calendar> datesJOAO = new HashMap<>();
-        datesJOAO.put("Arrive",cl1);
-        datesJOAO.put("Departure",cl2);
-        Member joao = new Member("Joao Miguel", "joao@miguel", 0, 91991, "", datesJOAO);
-
-        Map<String, Calendar> datesMARIA = new HashMap<>();
-        datesJOAO.put("Arrive",cl1);
-        datesJOAO.put("Departure",cl2);
-        Member maria = new Member("Maria Miguel", "maria@miguel", 0, 91991, "", datesMARIA);
-
-
-        ArrayList<Member> members = new ArrayList<>(Arrays.asList(joao, maria));
-        membersAdapter = new MembersListAdapter(rootView.getContext(), members);
+        membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberListIO);
         listView.setAdapter(membersAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView adapterView, View view, int position, long l) {
+                Member member = (Member) adapterView.getItemAtPosition(position);
+                startMemberSettingsActivity(member);
+            }
+        });
     }
+
+    private void startMemberSettingsActivity(Member member) {
+        Intent intent = new Intent(rootView.getContext(), ActivityUserSettings.class);
+        intent.putExtra("Member", member);
+        startActivityForResult(intent, 1);
+    }
+
 
 }
