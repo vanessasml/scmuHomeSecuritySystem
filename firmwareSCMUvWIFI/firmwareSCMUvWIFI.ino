@@ -37,11 +37,11 @@ bool authenticated = false;
 String tag = "";
 int inputState=0;
 int tagCounter = 0;
-int entrancesCounter , exitsCounter = 0;
+int entrancesCounter = 0 ;
 //Device configurations
 bool silencedMode = true;
 int PRESENCERADIUS = 30;
-
+String latestPassage;
 //instances
 //rfidSensor instance
 MFRC522 rfidSensor(SSPIN,RSTPIN);
@@ -127,7 +127,7 @@ void loop()
   if (checkTag(content)){ 
     Serial.println("Authorized access");
    // Wifi.println("Authorized access");
-   tag = content;
+    tag = content;
     authenticated = true;
    
     digitalWrite(ledGreen,HIGH);
@@ -226,15 +226,16 @@ boolean checkPresence(){
       exited =true;
       Serial.println("Exit");
       if(authenticated){
-        String toSend = "NSA"+tag;
-       toSend.replace(" ","");
+        latestPassage = "NSA"+tag;
+        entrancesCounter++;
         Serial.println("Authenticated Exit!!!");
-        Wifi.println(toSend);
+        
        }
        else{
-        Wifi.println("NSF-");
+        latestPassage = "NSF-";
+        entrancesCounter++;
         }
-         Wifi.print(EOL); 
+          
       delay(250);
       noTone(buzzer);
      // LED debug entrance sequence         
@@ -258,15 +259,13 @@ boolean checkPresence(){
     Serial.println("Entrance"); 
  
     if(authenticated){
-        String toSend = "NEA"+tag;
-         toSend.replace(" ","");
-        Serial.println("Authenticated Exit!!!");
-        Wifi.println(toSend);
+        latestPassage = "NEA"+tag; 
+        entrancesCounter++;     
        }
      else{
-      Wifi.println("NEF-");
+     latestPassage =  "NEF-";
+     entrancesCounter++;
       }
-        Wifi.print(EOL); 
     delay(250);
     noTone(buzzer);
     // LED debug entrance sequence
@@ -288,16 +287,17 @@ boolean checkPresence(){
     exited =true;
     Serial.println("Exit"); 
     if(authenticated){
-         String toSend = "NSA"+tag;
-          toSend.replace(" ","");
+         latestPassage = "NSA"+tag;
+         entrancesCounter++;
         Serial.println("Authenticated Exit!!!");
-        Wifi.println(toSend);
+       
        }
        else
        {
-        Wifi.println("NSF-");
+       latestPassage = "NSF-";
+       entrancesCounter++;
        }
-        Wifi.print(EOL); 
+        
     delay(250); 
     noTone(buzzer);
     // LED debug entrance sequence
@@ -319,15 +319,17 @@ boolean checkPresence(){
     entrance =true;
     Serial.println("Entrance");
     if(authenticated){
-         String toSend = "NEA"+tag;
+         latestPassage = "NEA"+tag;
+         entrancesCounter++;
         Serial.println("Authenticated Exit!!!");
-         toSend.replace(" ","");
-        Wifi.println(toSend);
+         ;
+     
        }
       else{
-      Wifi.println("NEF-");
+      latestPassage ="NEF-";
+      entrancesCounter++;
       }
-      Wifi.print(EOL); 
+     
         
         
     delay(250);
@@ -385,19 +387,28 @@ void process(WifiData Wifi) {
     if(pin == 1){
        if (Wifi.read() == '/'){
          value = Wifi.parseInt();
-         sendAlarmNotification();
+          Wifi.println("HTTP/1.1 200 OK\n");
+          Wifi.print(F("P----"));
+          Wifi.print(EOL);
+         
         }
       }
       if(pin == 2){
          if (Wifi.read() == '/'){
           value = Wifi.parseInt();
           silencedMode = !silencedMode;
+           Wifi.println("HTTP/1.1 200 OK\n");
+          Wifi.print(F("SilenceMode"));
+          Wifi.print(EOL);
           }
         }
       if(pin == 3){
          if (Wifi.read() == '/'){
           value = Wifi.parseInt();
            while(addTag());
+            Wifi.println("HTTP/1.1 200 OK\n");
+          Wifi.print(F("TAG ADDED"));
+          Wifi.print(EOL);
           }
           }
       if(pin == 4){
@@ -406,11 +417,16 @@ void process(WifiData Wifi) {
           sendOutputStatus();
           }
         }
-   Wifi.println("HTTP/1.1 200 OK\n");
+   
   }
 }
 void sendOutputStatus(){
-  
+          Wifi.println("HTTP/1.1 200 OK\n");
+          Wifi.print(F("PassageIndex:"));
+          Wifi.print(entrancesCounter);
+          Wifi.print(F("PassageValue:"));
+          Wifi.println(latestPassage);
+          Wifi.print(EOL);
   }
 boolean addTag(){
    if ( ! rfidSensor.PICC_IsNewCardPresent()) {
@@ -454,16 +470,14 @@ boolean addTag(){
     }
    return false;
   }
-void sendAlarmNotification(){
-  Wifi.println("P----");
-   Wifi.print(EOL);
-}
 void authenticateClient(){
     // Send feedback to client
      digitalWrite(ledGreen,HIGH);
-        delay(500);
-  Wifi.print(EOL); 
+        delay(500); 
   digitalWrite(ledGreen,LOW);
+  Wifi.println("HTTP/1.1 200 OK\n");
+  Wifi.print(F("Authenticated"));
+  Wifi.print(EOL);
  
 }
 void setupPins(){
