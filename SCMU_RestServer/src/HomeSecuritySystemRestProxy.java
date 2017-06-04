@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
@@ -63,7 +64,9 @@ public class HomeSecuritySystemRestProxy {
 		final static String ARDUINO_INET_ADDR = "192.168.1.6";
 		
 		//Server communication parameters
-		final static String SERVER_INET_ADDR = "192.168.240.2";
+		//final static String SERVER_INET_ADDR = "localhost";
+		final static String SERVER_INET_ADDR = "192.168.1.2";
+		//final static String SERVER_INET_ADDR = "10.22.104.43";
 		final static int SERVER_PORT = 8000;
 		final static int PORT = 8080;
 		
@@ -77,6 +80,8 @@ public class HomeSecuritySystemRestProxy {
 		static File authenticPassages;
 		static File nonAuthenticPassages;
 		static int actualPassageState;
+		//tag para efectuar a authenticação
+		static String rfidTagInstance;
 		// Key : String with smartphone credentials concatenated with a magnetic card tag
 		// Value : String with the resident Name
 		
@@ -86,7 +91,8 @@ public class HomeSecuritySystemRestProxy {
 		// Value : Boolean with false as Exit and True as Entrance
 		static HashMap<String,String>authenticatedEntrances;
 		static HashMap<String,String>nonAuthenticatedEntrances;
-		
+		static ServerSocket serverSocket;
+		static URI baseUri;
 		//ServerSocket para receber do arduino
 		//Socket 
 		public static void main(String[] args) {
@@ -104,7 +110,7 @@ public class HomeSecuritySystemRestProxy {
 			 residentsFile = new File(residentsFilePath);
 			 authenticPassages = new File(authenticPassagesFilePath);
 			 nonAuthenticPassages = new File(nonAuthenticatedPassagesPath);
-			 
+				
 			 if(!baseFile.isDirectory()){
 				 baseFile.mkdir();
 			 }
@@ -122,13 +128,49 @@ public class HomeSecuritySystemRestProxy {
 			 uploadNonAuthenticatedPassages(nonAuthenticPassages);
 			 actualPassageState = authenticatedEntrances.size()
 					 +nonAuthenticatedEntrances.size();
-			 
+	
 			 //Connecção com arduino e cliente
+			 //baseUri = UriBuilder.fromUri("http://"+SERVER_INET_ADDR+"/").port(PORT).build();
+			 baseUri = UriBuilder.fromUri("http://"+SERVER_INET_ADDR+"/").port(PORT).build();
+				ResourceConfig config = new ResourceConfig();
+				config.register(HomeSystemResource.class);
+				System.out.println("Client handler started at: http://"+SERVER_INET_ADDR+":"+PORT+"/");
+				try {
+					 serverSocket = new ServerSocket(SERVER_PORT);
+				} catch (IOException e1) {
+					
+					e1.printStackTrace();
+				}
+				
+				HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
+				System.err.println("rest server rdy");
+				Timer t = new Timer();
+			
+				
+				
+				t.scheduleAtFixedRate(new TimerTask(){
+
+					@Override
+					public void run() {
+						try {
+							Socket socket = serverSocket.accept();
+							byte[]address=null;
+							address = baseUri.toString().getBytes();
+							DatagramPacket reply = new DatagramPacket(address,address.length,
+									InetAddress.getByName(SERVER_INET_ADDR),SERVER_PORT);
+							socket.getOutputStream().write(reply.getData());
+						} catch (Exception e) {
+						
+							e.printStackTrace();
+						}
+					} 
+					
+				}, 0, 2000);
 			 
 			  (new Thread(new ServerHandler())).start();
-			  (new Thread(new ClientHandler())).start();
+			 
 	}
-		public class HomeSystemResource 
+		public static class HomeSystemResource 
 		{
 			
 			
@@ -149,7 +191,7 @@ public class HomeSecuritySystemRestProxy {
 				return Response.ok(residentsAtHome.keySet().toArray()).build();
 			}
 			@GET
-			@Path("at/residents/at/home/at/passages/at/valid")
+			@Path("at/residents/history")
 			public Response getListValidPassages(){
 				if(authenticatedEntrances==null){
 					return Response.status(400).build();
@@ -157,7 +199,7 @@ public class HomeSecuritySystemRestProxy {
 				return Response.ok(authenticatedEntrances.keySet().toArray()).build();
 			}
 			@GET
-			@Path("at/residents/at/home/at/passages/at/invalid")
+			@Path("at/residents/history")
 			public Response getlistNonValidPassages(){
 				if(nonAuthenticatedEntrances==null){
 					return Response.status(400).build();
@@ -165,9 +207,9 @@ public class HomeSecuritySystemRestProxy {
 				return Response.ok(nonAuthenticatedEntrances.keySet().toArray()).build();
 			}
 			@POST
-			@Path("/new/{tag}")
+			@Path("new/{tag}")
 			@Consumes(MediaType.APPLICATION_JSON)
-			public Response addMember(@PathParam("tag")String name, String email,int phoneNr,String tag )
+			public Response addMember(@PathParam("tag")String tag,String name, String email,int phoneNr)
 			{
 				try{
 				Resident r = new Resident(name, email, phoneNr, tag);
@@ -233,11 +275,13 @@ public class HomeSecuritySystemRestProxy {
 					return Response.status(400).build();
 				}			
 			}
+			
+			
 			//Disparar alarme
 			@POST
 			@Path("/new/")
 			@Consumes(MediaType.APPLICATION_JSON)
-			public Response authenticate()
+			public Response authenticate(String rfidTag)
 			{
 				String urlToSend = "http://"+ARDUINO_INET_ADDR+"/arduino/digital/"+1+"/1";
 				URL u;
@@ -249,7 +293,11 @@ public class HomeSecuritySystemRestProxy {
 						String inputLine;
 						while ((inputLine = in.readLine()) != null) {
 							System.out.println(inputLine);
+							//parsing rfid
+							
+							
 						}
+						rfidTagInstance = rfidTag;
 						return Response.ok().build();
 				} catch (Exception e) {
 				
@@ -257,50 +305,24 @@ public class HomeSecuritySystemRestProxy {
 					return Response.status(400).build();
 				}			
 			}
+			@GET
+			@Path("at/residents/at/home/at/passages/at/invalid")
+			public static Response broadcastAlert() {
+				return Response.ok("AlertBroadcast").build();
+				
+				
+				
+			}
 
 		}
-		public static class ClientHandler implements Runnable{
+		public static class ClientHandlerRest{
 			ServerSocket serverSocket;
 			URI baseUri;
-			public ClientHandler(){
-				baseUri = UriBuilder.fromUri("http://"+SERVER_INET_ADDR+"/").port(PORT).build();
-				ResourceConfig config = new ResourceConfig();
-				config.register(HomeSystemResource.class);
-				try {
-					 serverSocket = new ServerSocket(SERVER_PORT);
-				} catch (IOException e1) {
-					
-					e1.printStackTrace();
-				}
-				HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config);
-				Timer t = new Timer();
-				t.scheduleAtFixedRate(new TimerTask(){
-
-					@Override
-					public void run() {
-						try {
-							Socket socket = serverSocket.accept();
-							byte[]address=null;
-							address = baseUri.toString().getBytes();
-							DatagramPacket reply = new DatagramPacket(address,address.length,
-									InetAddress.getByName(SERVER_INET_ADDR),SERVER_PORT);
-							socket.getOutputStream().write(reply.getData());
-						} catch (Exception e) {
-						
-							e.printStackTrace();
-						}
-					} 
-					
-				}, 0, 2000);
-			}
-			@Override
-			public void run() {
+			public ClientHandlerRest(){
 				
-				while(true){
-					
-					
-				}
 			}
+			
+			
 		}
 		/*Handles comunication with arduino*/
 		public static class ServerHandler implements Runnable{
@@ -311,6 +333,7 @@ public class HomeSecuritySystemRestProxy {
 				
 				while(true){
 					try {
+						//Listen to entrances and exits
 							String urlToSend = "http://"+ARDUINO_INET_ADDR+"/arduino/digital/"+4+"/1";
 							URL u = new URL(urlToSend);
 							InputStream is = u.openStream();
@@ -338,8 +361,8 @@ public class HomeSecuritySystemRestProxy {
 								TimeUnit.MILLISECONDS.sleep(250);
 							
 						} catch (Exception e) {
-						
-							e.printStackTrace();
+							System.out.println("Timeout");
+							//e.printStackTrace();
 						}
 				}
 			}
@@ -367,6 +390,7 @@ public class HomeSecuritySystemRestProxy {
 				}
 				
 			}
+			System.out.println("Finished residents");
 		}
 		private static void uploadAuthenticatedPassages(File authenticatedPassagesFile){
 			File[] passages = authenticatedPassagesFile.listFiles();
@@ -387,7 +411,8 @@ public class HomeSecuritySystemRestProxy {
 				}
 				
 			}
-			System.out.println("Stored:"+authenticatedEntrances.size());
+			System.out.println("Stored : "+authenticatedEntrances.size());
+			System.out.println("Finished authenticated entrances");
 		}
 		private static void uploadNonAuthenticatedPassages(File nonAuthenticatedPassagesFile){
 			try{
@@ -410,7 +435,8 @@ public class HomeSecuritySystemRestProxy {
 					}
 				}
 			}
-			System.out.println("Stored:"+nonAuthenticatedEntrances.size());
+			System.out.println("Stored : "+nonAuthenticatedEntrances.size());
+			System.out.println("Finished  non authenticated entrances");
 			}catch(Exception e){
 				e.printStackTrace();
 				System.out.println("Unable to read non authenticated entrance");
@@ -432,18 +458,20 @@ public class HomeSecuritySystemRestProxy {
 			message.replace("-", "na");
 			System.out.println(date);
 			String keyTag = "";
+			String messageS = passageData[0]+passageData[1]+passageData[2];
 			for(int i = 3;i<passageData.length;i++){
 				keyTag=keyTag+passageData[i];
 			}
 			System.out.println(keyTag);
-			
-			switch(message)
+			System.out.println(rfidTagInstance);
+			switch(messageS)
 			{
-			case "NEA-":
+			case "NEA":
 					
-					String content = keyTag+true+true;
+					String content = keyTag+rfidTagInstance+"_"+true+"_"+true;
 					
 					authenticatedEntrances.put(date,content);
+					residentsAtHome.put(keyTag+rfidTagInstance, residentsColl.get(keyTag+rfidTagInstance));
 					File newEntrance = new File(authenticPassages.getAbsolutePath()+"/"+date+message);
 					Files.write(newEntrance.toPath(), content.getBytes(), StandardOpenOption.CREATE_NEW);
 					FileOutputStream fos;
@@ -451,9 +479,9 @@ public class HomeSecuritySystemRestProxy {
 					BufferedOutputStream bos = new BufferedOutputStream(fos);
 					bos.write(content.getBytes());
 				break;
-			case "NEF-":
+			case "NEF":
 					
-					content = keyTag+true+false;
+					content = keyTag+"_"+true+"_"+false;
 					nonAuthenticatedEntrances.put(date,content);
 					newEntrance = new File(nonAuthenticPassages.getAbsolutePath()+"/"+date+message);
 					Files.write(newEntrance.toPath(), content.getBytes(), StandardOpenOption.CREATE_NEW);
@@ -462,10 +490,11 @@ public class HomeSecuritySystemRestProxy {
 					bos = new BufferedOutputStream(fos);
 					bos.write(content.getBytes());
 				break;
-			case "NSA-":
+			case "NSA":
 					
-					content = keyTag+false+true;
+					content = keyTag+rfidTagInstance+"_"+true+"_"+true; 
 					authenticatedEntrances.put(date,content);
+					residentsAtHome.remove(keyTag+rfidTagInstance);
 					newEntrance = new File(authenticPassages.getAbsolutePath()+"/"+date+message);
 					Files.write(newEntrance.toPath(), content.getBytes(), StandardOpenOption.CREATE_NEW);
 					
@@ -473,9 +502,9 @@ public class HomeSecuritySystemRestProxy {
 					bos = new BufferedOutputStream(fos);
 					bos.write(content.getBytes());
 				break;
-			case "NSF-":
+			case "NSF":
 					
-					content = keyTag+false+false;
+					content = keyTag+"_"+true+"_"+false;
 					nonAuthenticatedEntrances.put(date,content);
 					 newEntrance = new File(nonAuthenticPassages.getAbsolutePath()+"/"+date+message);
 					 Files.write(newEntrance.toPath(), content.getBytes(), StandardOpenOption.CREATE_NEW);
@@ -484,11 +513,11 @@ public class HomeSecuritySystemRestProxy {
 						 bos = new BufferedOutputStream(fos);
 						bos.write(content.getBytes());
 				break;
-			case "P----":
+			case "P--":
 				broadcastAlert();
 			}
 			System.out.println("New entrance added");
-			
+			rfidTagInstance = "";
 			//Saves in file system
 			
 			//Broadcast changes to android clients
@@ -497,8 +526,8 @@ public class HomeSecuritySystemRestProxy {
 				e.printStackTrace();
 			}
 		}
-		private static void broadcastAlert() {
-		
-			
-		}
+			private static void broadcastAlert() 
+			{
+				HomeSystemResource.broadcastAlert();
+			}
 }
