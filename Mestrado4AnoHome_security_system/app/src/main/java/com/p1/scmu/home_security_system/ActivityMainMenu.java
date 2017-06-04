@@ -61,25 +61,38 @@ public class ActivityMainMenu extends AppCompatActivity {
             R.mipmap.icon_at_home,
             R.mipmap.icon_history};
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private  ServiceConnection mConnection = new ServiceConnection() {
+        @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             // This is called when the connection with the service has been
             // established, giving us the service object we can use to
             // interact with the service.  Because we have bound to a explicit
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
-            mBoundService = (LocalService.LocalBinder)service;
-            int statusCode = mBoundService.getStatusCode();
-            Log.d("Binding.java","called onServiceConnected. statusCode: " + statusCode);
+         //   mBoundService = (LocalService.LocalBinder)service;
+            Log.d("Lol","LOL");
+            System.err.println("Entrei aqui");
+            LocalService.LocalBinder binder = (LocalService.LocalBinder) service;
+            localService = binder.getService();
+            mIsBound = true;
+          //  int statusCode = mBoundService.getStatusCode();
+           // Log.d("Binding.java","called onServiceConnected. statusCode: " + statusCode);
+            if(localService == null)
+            {
+                Log.d("scasda","NULL");
+            }
 
+            localService.SendRequest();
+            refreshMembersLists();
         }
-
+        @Override
         public void onServiceDisconnected(ComponentName className) {
             // This is called when the connection with the service has been
             // unexpectedly disconnected -- that is, its process crashed.
             // Because it is running in our same process, we should never
             // see this happen.
             mBoundService = null;
+            mIsBound = false;
             Log.d("Binding", "called onServiceDisconnected");
 
         }
@@ -97,8 +110,8 @@ public class ActivityMainMenu extends AppCompatActivity {
 
     void doUnbindService() {
         if (mIsBound) {
-            int statusCode = mBoundService.getStatusCode();
-            if (statusCode != 0) Log.d("doUnbindService", "Binding.java statusCode: " + statusCode);
+           // int statusCode = mBoundService.getStatusCode();
+          //  if (statusCode != 0) Log.d("doUnbindService", "Binding.java statusCode: " + statusCode);
 
             // Tell the user we did an unbind
             Toast.makeText(this, "Disconnected from service", Toast.LENGTH_SHORT).show();
@@ -109,24 +122,25 @@ public class ActivityMainMenu extends AppCompatActivity {
         }
     }
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_menu);
+    protected void onStart() {
+        super.onStart();
+        Log.d("OnStart","kjdasdhasidhasi");
 
-        enableWifiService();
+        Intent intent = new Intent(this, LocalService.class);
+        startService(intent);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        System.err.println(localService);
+    }
+    @Override
+    protected void onResume(){
+        Log.d("OnResume","kjdasdhasidhasi");
+        super.onResume();
+        mIsBound = true;
 
-        if(!localService.isRunning){
-            Intent intent = new Intent(this, LocalService.class);
-            startService(intent);
-        }
 
-        localService.SendRequest();
-        refreshMembersLists();
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
+
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
@@ -140,9 +154,34 @@ public class ActivityMainMenu extends AppCompatActivity {
         tabLayout.getTabAt(1).setIcon(imageResId[1]);
         tabLayout.getTabAt(2).setIcon(imageResId[2]);
 
+
+}
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mIsBound) {
+            unbindService(mConnection);
+            mIsBound = false;
+        }
+    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d("OnCreate","kjdasdhasidhasi");
+        setContentView(R.layout.activity_main_menu);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        //enableWifiService();
+        Intent intent = new Intent(this, LocalService.class);
+        startService(intent);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+
     }
 
     public void refreshMembersLists(){
+        Log.d("Refresh","Refresh members list");
         memberList = localService.getMembers();
         memberListI = localService.getMembersAtHome();
         memberListIO = localService.getAllMembersHistory();

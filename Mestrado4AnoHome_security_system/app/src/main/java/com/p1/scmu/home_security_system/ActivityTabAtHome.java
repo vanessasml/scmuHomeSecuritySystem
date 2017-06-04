@@ -28,22 +28,23 @@ public class ActivityTabAtHome extends Fragment{
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState){
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+try {
+    ListView listView = (ListView) rootView.findViewById(R.id.list_at_home_users);
 
-        ListView listView = (ListView) rootView.findViewById(R.id.list_at_home_users);
+    activityMainMenu.refreshMembersLists();
+    membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberListI);
+    listView.setAdapter(membersAdapter);
 
-        activityMainMenu.refreshMembersLists();
-        membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberListI);
-        listView.setAdapter(membersAdapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView adapterView, View view, int position, long l) {
-                Member member = (Member) adapterView.getItemAtPosition(position);
-                startMemberSettingsActivity(member);
-            }
-        });
+    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView adapterView, View view, int position, long l) {
+            Member member = (Member) adapterView.getItemAtPosition(position);
+            startMemberSettingsActivity(member);
+        }
+    });
+}catch(Exception e){}
     }
 
     private void startMemberSettingsActivity(Member member) {

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.p1.scmu.home_security_system">
 
-    <service android:name="com.p1.scmu.home_security_system.LocalService"></service>
+
 
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -27,6 +27,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
         <activity
             android:name=".ActivityAddUser"
@@ -60,5 +61,6 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+        <service android:name=".LocalService" />
     </application>
 </manifest>

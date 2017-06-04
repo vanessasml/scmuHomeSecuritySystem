@@ -49,22 +49,24 @@ public class ActivityTabMembers extends Fragment{
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState){
-        super.onActivityCreated(savedInstanceState);
 
-        ListView listView = (ListView) rootView.findViewById(R.id.list_view_members);
+            super.onActivityCreated(savedInstanceState);
 
-        activityMainMenu.refreshMembersLists();
-        membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberList);
-        listView.setAdapter(membersAdapter);
+            ListView listView = (ListView) rootView.findViewById(R.id.list_view_members);
+            System.out.println("Main menu "+activityMainMenu);
+     //       activityMainMenu.refreshMembersLists();
+        //    membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberList);
+         //   listView.setAdapter(membersAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView adapterView, View view, int position, long l) {
-                Member member = (Member) adapterView.getItemAtPosition(position);
-                toUpdate = member;
-                startMemberSettingsActivity(member);
-            }
-        });
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView adapterView, View view, int position, long l) {
+                    Member member = (Member) adapterView.getItemAtPosition(position);
+                    toUpdate = member;
+                    startMemberSettingsActivity(member);
+                }
+            });
+
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

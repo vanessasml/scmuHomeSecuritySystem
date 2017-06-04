@@ -106,24 +106,24 @@ public class LocalService extends Service {
 
     private void manageMessages(JsonElement message, String channel) {
 
-            try {
-                JsonArray jsonArray = message.getAsJsonArray();
-                for(int i=0;i<jsonArray.size();i++){
-                    JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
-                    Member member = new Member();
-                    member.getMemberFromJSON(jsonObject);
+        try {
+            JsonArray jsonArray = message.getAsJsonArray();
+            for(int i=0;i<jsonArray.size();i++){
+                JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
+                Member member = new Member();
+                member.getMemberFromJSON(jsonObject);
 
-                    if(channel.equals(CHANNEL_MEMBERS)) {
-                        allMembers.add(member);
-                    }else if(channel.equals(CHANNEL_MEMBERSI)){
-                        membersI.add(member);
-                    }else if(channel.equals(CHANNEL_MEMBERSIO)){
-                        membersIO.add(member);
-                    }
+                if(channel.equals(CHANNEL_MEMBERS)) {
+                    allMembers.add(member);
+                }else if(channel.equals(CHANNEL_MEMBERSI)){
+                    membersI.add(member);
+                }else if(channel.equals(CHANNEL_MEMBERSIO)){
+                    membersIO.add(member);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void SendRequest()
@@ -234,14 +234,14 @@ public class LocalService extends Service {
         }
     }
 
-        @Override
+    @Override
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "Service onCreate");
 
         isRunning=true;
 
-        initPubNub();
+        //initPubNub();
 
         Cache cache = new DiskBasedCache(getCacheDir(), 1024*10240);
         Network network = new BasicNetwork(new HurlStack());
@@ -292,4 +292,3 @@ public class LocalService extends Service {
     }
 
 }
-
