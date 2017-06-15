@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,6 +16,8 @@ import java.util.List;
  */
 
 public class MembersListAdapter extends ArrayAdapter<Member> {
+
+    private final int request_code_update_member = 1;
 
     public MembersListAdapter(Context context, List<Member> members) { super(context, 0, members); }
 
@@ -36,6 +39,9 @@ public class MembersListAdapter extends ArrayAdapter<Member> {
         ImageView img = (ImageView) convertView.findViewById(R.id.user_img);
         img.setImageResource(R.mipmap.item_user_image);
 
+        ImageButton imageButton = (ImageButton) convertView.findViewById(R.id.imageButton);
+
         return convertView;
     }
+
 }

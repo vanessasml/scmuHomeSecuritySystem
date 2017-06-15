@@ -65,15 +65,16 @@
                 android:background="@android:color/transparent"
                 android:clickable="false"
                 android:cursorVisible="false"
+                android:ems="10"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:ems="10"
                 android:inputType="textPersonName"
                 android:text="Departure time"
                 android:textAlignment="viewEnd"
                 android:textColor="?attr/colorControlNormal"
                 android:textColorLink="@android:color/transparent"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:visibility="visible" />
 
             <ImageButton
                 android:id="@+id/imageButton"
@@ -85,7 +86,9 @@
                 android:layout_marginRight="@dimen/activity_vertical_margin"
                 android:background="@android:color/transparent"
                 android:padding="10dp"
-                app:srcCompat="@mipmap/icon_button_horizontal_settings" />
+                app:srcCompat="@mipmap/icon_button_horizontal_settings"
+                android:focusableInTouchMode="true"
+                android:clickable="true"/>
 
         </RelativeLayout>
 
