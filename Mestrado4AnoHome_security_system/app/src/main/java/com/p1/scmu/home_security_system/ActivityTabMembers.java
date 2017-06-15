@@ -21,14 +21,15 @@ import static android.app.Activity.RESULT_OK;
 
 public class ActivityTabMembers extends Fragment{
 
-    private static final int request_code_add_member = 2;
-    private static final int request_code_update_member = 3;
+    private final int request_code_add_member = 2;
+    private final int request_code_update_member = 3;
 
     private MembersListAdapter membersAdapter;
     private View rootView;
     private ImageButton userSettingsButton;
     private ActivityMainMenu activityMainMenu;
     private Member toUpdate;
+    private ListView listView;
 
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,11 +53,11 @@ public class ActivityTabMembers extends Fragment{
 
             super.onActivityCreated(savedInstanceState);
 
-            ListView listView = (ListView) rootView.findViewById(R.id.list_view_members);
+            listView = (ListView) rootView.findViewById(R.id.list_view_members);
             System.out.println("Main menu "+activityMainMenu);
-     //       activityMainMenu.refreshMembersLists();
-        //    membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberList);
-         //   listView.setAdapter(membersAdapter);
+            //activityMainMenu.refreshMembersLists();
+            //membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberList);
+            //listView.setAdapter(membersAdapter);
 
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override

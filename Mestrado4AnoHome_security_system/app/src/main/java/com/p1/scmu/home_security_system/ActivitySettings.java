@@ -14,7 +14,6 @@ import android.widget.Switch;
 
 public class ActivitySettings extends AppCompatActivity {
 
-    private static final int request_code =1;
     public static final String SETTINGS = "Settings";
     public static final String PREVIOUS_SETTINGS = "PreviousSettings";
     //public static final String OWNER = "Owner";

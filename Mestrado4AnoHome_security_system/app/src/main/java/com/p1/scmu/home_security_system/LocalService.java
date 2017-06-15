@@ -18,7 +18,6 @@ import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -49,13 +48,13 @@ public class LocalService extends Service {
     public static final String GET_MEMBERSIO = "residents/history/invalid/";
     public static final String GET_MEMBERS = "residents/List/";
     public static final String INSERT_MEMBER = "residents/new/";
-  //  public static final String DELETE_MEMBER = "";
+    //  public static final String DELETE_MEMBER = "";
     public static final String INSERT_SETTINGS = "residents/settings/";
     private static final String URL_REQUEST_MEMBERS_LIST =URL+GET_MEMBERSI;
     private static final String URL_REQUEST_MEMBERS_VI =URL+GET_MEMBERSIO;
     private static final String URL_REQUEST_MEMBERS =URL+ GET_MEMBERS; //POST OU DELETE...
     private static final String URL_REQUEST_INSERT_MEMBERS =URL+INSERT_MEMBER; //POST OU DELETE...
- //   private static final String URL_REQUEST_DELETE_MEMBERS =URL+DELETE_MEMBER; //POST OU DELETE...
+    //   private static final String URL_REQUEST_DELETE_MEMBERS =URL+DELETE_MEMBER; //POST OU DELETE...
 
     private static final String CHANNEL_MEMBERSIO = "channel_membersIO";
     private static final String CHANNEL_MEMBERSI = "channel_membersI0";
@@ -130,9 +129,9 @@ public class LocalService extends Service {
     public void SendRequest()
     {
         reQueue = Volley.newRequestQueue(this);
+
         allMembers = sendRequestToMembersList(URL_REQUEST_MEMBERS);
-        membersI = sendRequestToMembersList(URL_REQUEST_MEMBERS_LIST);
-        membersIO = sendRequestToMembersList(URL_REQUEST_MEMBERS_VI);
+        membersI = sendRequestToMembersList(URL_REQUEST_MEMBERS_LIST);  membersIO = sendRequestToMembersList(URL_REQUEST_MEMBERS_VI);
     }
     private List<Member> sendRequestToMembersList(String url){
 

@@ -35,7 +35,7 @@ public class ActivityUserSettings extends ActivityUser {
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_add_user);
+            setContentView(R.layout.activity_user_settings);
 
             Intent intent = getIntent();
             Bundle bundle = intent.getExtras();
@@ -55,7 +55,7 @@ public class ActivityUserSettings extends ActivityUser {
 
             inputName.setText(selectedMember.fullName);
             inputEmail.setText(selectedMember.email);
-            inputNumber.setText(selectedMember.mobile);
+            //inputNumber.setText(selectedMember.mobile);
             inputRFID.setText(selectedMember.rfid);
 
             btn_rfid = (ImageButton) findViewById(R.id.rfid_change_button);
