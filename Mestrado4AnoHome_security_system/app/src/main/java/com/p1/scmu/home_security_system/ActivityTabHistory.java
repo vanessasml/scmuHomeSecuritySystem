@@ -11,6 +11,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static android.app.Activity.RESULT_OK;
 
 /**
@@ -25,6 +28,7 @@ public class ActivityTabHistory extends Fragment{
     private View rootView;
     private ActivityMainMenu activityMainMenu;
     private Member toUpdate;
+    private ListView listView;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -37,27 +41,37 @@ public class ActivityTabHistory extends Fragment{
     public void onActivityCreated(@Nullable Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
 
-        ListView listView = (ListView) rootView.findViewById(R.id.list_history_users);
-
-
+        listView = (ListView) rootView.findViewById(R.id.list_history_users);
 //        Member j = new Member("Joao", "joao@joao.com", 919239, "qwerty");
 //        Member m = new Member("Maria", "maria@joao.com", 919239, "aiai");
 //        List<Member> members= new ArrayList<Member>();
 //        members.add(j);
 //        members.add(m);
-       // activityMainMenu.refreshMembersLists();
-        membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberListIO);
-        listView.setAdapter(membersAdapter);
 
+    }
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView adapterView, View view, int position, long l) {
-                Member member = (Member) adapterView.getItemAtPosition(position);
-                toUpdate = member;
-                startMemberSettingsActivity(member);
-            }
-        });
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        if(activityMainMenu.serviceStarted) {
+            activityMainMenu.refreshMembersLists();
+
+            List<Member> members;
+            if (activityMainMenu.memberList != null) members = activityMainMenu.memberList;
+            else members = new ArrayList<>();
+
+            membersAdapter = new MembersListAdapter(rootView.getContext(), members);
+            listView.setAdapter(membersAdapter);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView adapterView, View view, int position, long l) {
+                    Member member = (Member) adapterView.getItemAtPosition(position);
+                    toUpdate = member;
+                    startMemberSettingsActivity(member);
+                }
+            });
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

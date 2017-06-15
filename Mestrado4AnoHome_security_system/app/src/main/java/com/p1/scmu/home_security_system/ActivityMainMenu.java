@@ -55,6 +55,8 @@ public class ActivityMainMenu extends AppCompatActivity {
     private WifiManager wifi;
     private LocalService.LocalBinder mBoundService;
     private boolean mIsBound;
+    protected boolean serviceStarted;
+
 
     private int[] imageResId={R.mipmap.icon_members,
             R.mipmap.icon_at_home,
@@ -76,10 +78,9 @@ public class ActivityMainMenu extends AppCompatActivity {
             mIsBound = true;
             //  int statusCode = mBoundService.getStatusCode();
             // Log.d("Binding.java","called onServiceConnected. statusCode: " + statusCode);
-            if(localService == null)
-            {
-                Log.d("scasda","NULL");
-            }
+
+            if(localService == null) Log.d("scasda","NULL");
+            else serviceStarted=true;
 
             localService.SendRequest();
             refreshMembersLists();

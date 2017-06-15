@@ -165,7 +165,14 @@ public class LocalService extends Service {
         return members;
     }
 
-    public List<Member> getMembers(){ return allMembers; }
+    public List<Member> getMembers(){
+
+        Member j = new Member("Joao", "joao@joao.com", 919239, "qwerty");
+        Member m = new Member("Maria", "maria@joao.com", 919239, "aiai");
+        List<Member> members= new ArrayList<Member>();
+        members.add(j);
+        members.add(m);
+        return members; }
 
     public List<Member> getMembersAtHome(){
         return membersI;

@@ -17,6 +17,9 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static android.app.Activity.RESULT_OK;
 
 public class ActivityTabMembers extends Fragment{
@@ -51,22 +54,36 @@ public class ActivityTabMembers extends Fragment{
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState){
 
-            super.onActivityCreated(savedInstanceState);
+        super.onActivityCreated(savedInstanceState);
 
-            listView = (ListView) rootView.findViewById(R.id.list_view_members);
-            System.out.println("Main menu "+activityMainMenu);
-            //activityMainMenu.refreshMembersLists();
-            //membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberList);
-            //listView.setAdapter(membersAdapter);
+        listView = (ListView) rootView.findViewById(R.id.list_view_members);
+        System.out.println("Main menu "+activityMainMenu);
 
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView adapterView, View view, int position, long l) {
-                    Member member = (Member) adapterView.getItemAtPosition(position);
-                    toUpdate = member;
-                    startMemberSettingsActivity(member);
-                }
-            });
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+       if(activityMainMenu.serviceStarted){
+           activityMainMenu.refreshMembersLists();
+
+           List<Member> members;
+           if(activityMainMenu.memberList!=null) members= activityMainMenu.memberList;
+           else members = new ArrayList<>();
+
+           membersAdapter = new MembersListAdapter(rootView.getContext(), members);
+           listView.setAdapter(membersAdapter);
+
+           listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+               @Override
+               public void onItemClick(AdapterView adapterView, View view, int position, long l) {
+                   Member member = (Member) adapterView.getItemAtPosition(position);
+                   toUpdate = member;
+                   startMemberSettingsActivity(member);
+               }
+           });
+       }
 
     }
 
