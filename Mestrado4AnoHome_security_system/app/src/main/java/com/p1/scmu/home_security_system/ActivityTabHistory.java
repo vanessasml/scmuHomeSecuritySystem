@@ -4,14 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-
-import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by Vanessa on 5/22/2017.
@@ -19,12 +16,9 @@ import static android.app.Activity.RESULT_OK;
 
 public class ActivityTabHistory extends Fragment{
 
-    private final int request_code_update_member = 4;
-
     private MembersListAdapter membersAdapter;
     private View rootView;
     private ActivityMainMenu activityMainMenu;
-    private Member toUpdate;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -39,46 +33,24 @@ public class ActivityTabHistory extends Fragment{
 
         ListView listView = (ListView) rootView.findViewById(R.id.list_history_users);
 
-
-//        Member j = new Member("Joao", "joao@joao.com", 919239, "qwerty");
-//        Member m = new Member("Maria", "maria@joao.com", 919239, "aiai");
-//        List<Member> members= new ArrayList<Member>();
-//        members.add(j);
-//        members.add(m);
-       // activityMainMenu.refreshMembersLists();
+        activityMainMenu.refreshMembersLists();
         membersAdapter = new MembersListAdapter(rootView.getContext(), activityMainMenu.memberListIO);
         listView.setAdapter(membersAdapter);
-
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView adapterView, View view, int position, long l) {
                 Member member = (Member) adapterView.getItemAtPosition(position);
-                toUpdate = member;
                 startMemberSettingsActivity(member);
             }
         });
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.i("ActivityRFIDReader", "onActivity");
-        if(requestCode==request_code_update_member){
-            if(resultCode == RESULT_OK) {
-                Log.i("ActivityAddUser", "guardando");
-                Member updated = (Member) data.getExtras().get(ActivityUserSettings.UPDATE_MEMBER);
-                activityMainMenu.memberList.remove(toUpdate.rfid);
-                toUpdate = null;
-                activityMainMenu.memberList.add(updated);
-                activityMainMenu.sendToInsertMemberToServer(updated);
-            }
-        }
-    }
-
     private void startMemberSettingsActivity(Member member) {
         Intent intent = new Intent(rootView.getContext(), ActivityUserSettings.class);
         intent.putExtra("Member", member);
-        startActivityForResult(intent, request_code_update_member);
+        startActivityForResult(intent, 1);
     }
+
 
 }

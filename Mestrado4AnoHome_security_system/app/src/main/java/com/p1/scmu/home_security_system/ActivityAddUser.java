@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 public class ActivityAddUser extends ActivityUser {
 
     private static final int request_code_rfid =1;
-    //private static final int request_code_add_user =2;
+    private static final int request_code_add_user =2;
     public static final String MEMBER = "Member";
 
     private TextInputLayout inputLayoutName, inputLayoutEmail, inputLayoutNumber;

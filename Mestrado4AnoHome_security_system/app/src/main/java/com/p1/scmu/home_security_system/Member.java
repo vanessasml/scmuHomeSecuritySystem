@@ -28,12 +28,7 @@ public class Member implements Parcelable{
 
     public String id; // identify user
 
-    public Member() {
-        this.fullName = "";
-        this.email = "";
-        this.mobile = 0;
-        this.rfid = "";
-    }
+    public Member() { }
 
     public Member(String fullName, String email, int mobile, String rfid) {
         this.fullName = fullName;

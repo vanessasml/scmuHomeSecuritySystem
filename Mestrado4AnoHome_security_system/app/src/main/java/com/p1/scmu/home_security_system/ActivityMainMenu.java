@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 
@@ -149,11 +150,6 @@ public class ActivityMainMenu extends AppCompatActivity {
         setContentView(R.layout.activity_main_menu);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        appOwner = new Member();
-        currSettings = new Settings();
-
-
         //enableWifiService();
         Intent intent = new Intent(this, LocalService.class);
         startService(intent);
@@ -191,17 +187,16 @@ public class ActivityMainMenu extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        switch(id){
-            case R.id.action_settings:
-                startSettingsActivity();
-                return true;
-            case R.id.action_user_profile:
-                startUserSettingsActivity(appOwner);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            startSettingsActivity(appOwner.rfid);
+            return true;
+        }else if(id== R.id.action_user_profile){
+            startUserSettingsActivity(appOwner);
         }
 
+        return super.onOptionsItemSelected(item);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -231,7 +226,7 @@ public class ActivityMainMenu extends AppCompatActivity {
         localService.sendSettings(settings, Request.Method.POST, LocalService.INSERT_SETTINGS);
     }
 
-    private void startSettingsActivity() {
+    private void startSettingsActivity(String auth) {
         Intent intent = new Intent(this, ActivitySettings.class);
         intent.putExtra(ActivitySettings.PREVIOUS_SETTINGS, currSettings);
         startActivityForResult(intent, request_code_settings);
@@ -242,7 +237,6 @@ public class ActivityMainMenu extends AppCompatActivity {
         intent.putExtra(MEMBER, member);
         startActivityForResult(intent, request_code_user_settings);
     }
-
 
     /**
      * A placeholder fragment containing a simple view.
