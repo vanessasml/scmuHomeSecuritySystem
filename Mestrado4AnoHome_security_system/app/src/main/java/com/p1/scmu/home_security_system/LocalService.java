@@ -18,6 +18,7 @@ import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -43,18 +44,18 @@ import java.util.List;
 
 public class LocalService extends Service {
 
-    private static final String URL = "http://localhost:8000/";
-    public static final String GET_MEMBERSI = "";
-    public static final String GET_MEMBERSIO = "";
-    public static final String GET_MEMBERS = "";
-    public static final String INSERT_MEMBER = "";
-    public static final String DELETE_MEMBER = "";
-    public static final String INSERT_SETTINGS = "";
+    private static final String URL = "http://192.168.1.9:8080/scmu/services/homeSecurity/";
+    public static final String GET_MEMBERSI = "residents/home/";
+    public static final String GET_MEMBERSIO = "residents/history/invalid/";
+    public static final String GET_MEMBERS = "residents/List/";
+    public static final String INSERT_MEMBER = "residents/new/";
+  //  public static final String DELETE_MEMBER = "";
+    public static final String INSERT_SETTINGS = "residents/settings/";
     private static final String URL_REQUEST_MEMBERS_LIST =URL+GET_MEMBERSI;
     private static final String URL_REQUEST_MEMBERS_VI =URL+GET_MEMBERSIO;
     private static final String URL_REQUEST_MEMBERS =URL+ GET_MEMBERS; //POST OU DELETE...
     private static final String URL_REQUEST_INSERT_MEMBERS =URL+INSERT_MEMBER; //POST OU DELETE...
-    private static final String URL_REQUEST_DELETE_MEMBERS =URL+DELETE_MEMBER; //POST OU DELETE...
+ //   private static final String URL_REQUEST_DELETE_MEMBERS =URL+DELETE_MEMBER; //POST OU DELETE...
 
     private static final String CHANNEL_MEMBERSIO = "channel_membersIO";
     private static final String CHANNEL_MEMBERSI = "channel_membersI0";
@@ -133,7 +134,6 @@ public class LocalService extends Service {
         membersI = sendRequestToMembersList(URL_REQUEST_MEMBERS_LIST);
         membersIO = sendRequestToMembersList(URL_REQUEST_MEMBERS_VI);
     }
-
     private List<Member> sendRequestToMembersList(String url){
 
         final List<Member> members = new ArrayList<>();

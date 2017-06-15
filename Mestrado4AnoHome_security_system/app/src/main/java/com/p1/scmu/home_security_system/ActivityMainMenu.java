@@ -98,29 +98,7 @@ public class ActivityMainMenu extends AppCompatActivity {
         }
     };
 
-    void doBindService() {
-        // Establish a connection with the service.  We use an explicit
-        // class name because we want a specific service implementation that
-        // we know will be running in our own process (and thus won't be
-        // supporting component replacement by other applications).
-        bindService(new Intent(this, LocalService.class), mConnection, Context.BIND_AUTO_CREATE);
-        Toast.makeText(this, "Connected from service", Toast.LENGTH_SHORT).show();
-        mIsBound = true;
-    }
 
-    void doUnbindService() {
-        if (mIsBound) {
-           // int statusCode = mBoundService.getStatusCode();
-          //  if (statusCode != 0) Log.d("doUnbindService", "Binding.java statusCode: " + statusCode);
-
-            // Tell the user we did an unbind
-            Toast.makeText(this, "Disconnected from service", Toast.LENGTH_SHORT).show();
-
-            // Detach our existing connection.
-            unbindService(mConnection);
-            mIsBound = false;
-        }
-    }
     @Override
     protected void onStart() {
         super.onStart();
