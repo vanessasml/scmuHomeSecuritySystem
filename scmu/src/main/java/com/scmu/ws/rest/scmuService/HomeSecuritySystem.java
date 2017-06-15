@@ -149,6 +149,36 @@ public class HomeSecuritySystem {
 		}
 	}
 	/////////Commands////////
+	@POST
+	@Path("/residents/settings")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response setSettings(Settings newSettings)
+	{
+		try{
+			System.out.println("Changing settings");
+		//Resident r = new Resident(name, email, phoneNr, tag);
+		Boolean silentMode = newSettings.getSilentMode();
+		Boolean alarmMode = newSettings.getAlarmMode();
+		String authenticate = newSettings.getAuthTag();
+		if(silentMode){
+			return toggleSilenceMode();
+		}
+		if(alarmMode){
+			return firePushButton();
+		}
+		if(authenticate!=null){
+			return authenticate(authenticate);
+		}
+		else
+		{
+			return Response.ok("Invalid Settings").build();}
+		}
+		catch(Exception e){
+			return Response.status(400).build();
+		}
+	}
+	
 	//SilenceMode
 	@GET
 	@Path("/silence")
@@ -281,6 +311,7 @@ public class HomeSecuritySystem {
 		  (new Thread(new ServerHandler())).start();
 		return 0;
 	}
+	/*Kill the arduino listener before starting a new one when there is a call*/
 	private void killListener() {
 		// TODO Auto-generated method stub
 		stopThread = true;
