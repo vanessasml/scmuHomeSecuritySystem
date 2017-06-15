@@ -37,13 +37,8 @@ import javax.ws.rs.core.UriBuilder;
 public class HomeSecuritySystem {
 
 	final static  String ARDUINO_INET_ADDR = "192.168.1.6";
-	
-	//Server communication parameters
-	//final static String SERVER_INET_ADDR = "localhost";
-	final  String SERVER_INET_ADDR = "192.168.1.9";
-	//final static String SERVER_INET_ADDR = "10.22.104.43";
 	final int SERVER_PORT = 8000;
-	final  int PORT = 8080;
+	
 	
 	//Diretoria de ficheiros
 	 String basePath = "./storage";
@@ -68,25 +63,186 @@ public class HomeSecuritySystem {
 	 static HashMap<String,String>nonAuthenticatedEntrances;
 	 ServerSocket serverSocket;
 	 URI baseUri;
-	 
+	
 	int starting = initResource();
+	private static boolean stopThread;
+	
 	
 	@GET
-	@Path("/residents")
+	@Path("/residents/List")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response getListResidents(){
 		if(residentsColl==null){
 			return Response.status(400).build();
 		}
 		else if(residentsColl.isEmpty()){
-			String empty = "Server does not contain Any servers";
+			String empty = "Server does not contain any residents";
 					return Response.ok().entity(empty).build();
 		}
 		else
 			return Response.ok(residentsColl.keySet().toArray()).build();
 	}
+	
+	@GET
+	@Path("/residents/home")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getListAtHome(){
+		if(residentsColl==null){
+			return Response.status(400).build();
+		}
+		else if(residentsColl.isEmpty()){
+			String empty = "Server does not contain any residents or nobody is at home";
+					return Response.ok().entity(empty).build();
+		}
+		else{
+		return Response.ok(residentsAtHome.keySet().toArray()).build();
+		}
+	}
+	@GET
+	@Path("/residents/history/valid")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getListValidPassages(){
+		if(authenticatedEntrances==null){
+			return Response.status(400).build();
+		}
+		else if(authenticatedEntrances.isEmpty()){
+			String empty = "Server does not contain any authenticated entrances";
+					return Response.ok().entity(empty).build();
+		}
+		else
+		return Response.ok(authenticatedEntrances.keySet().toArray()).build();
+	}
+	@GET
+	@Path("/residents/history/invalid")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getlistNonValidPassages(){
+		if(nonAuthenticatedEntrances==null){
+			return Response.status(400).build();
+		}
+		else if(nonAuthenticatedEntrances.isEmpty()){
+			String empty = "Server does not contain any non-authenticated entrances";
+					return Response.ok().entity(empty).build();
+		}
+		else
+		return Response.ok(nonAuthenticatedEntrances.keySet().toArray()).build();
+	}
+	@POST
+	@Path("/residents/new")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response addMember(Resident newResident)
+	{
+		try{
+			System.out.println("Adding user with tag : "+newResident.getTag());
+		//Resident r = new Resident(name, email, phoneNr, tag);
+		String content = newResident.getName()+"_"+newResident.getEmail()+"_"+newResident.getPhoneNr()+"_"+newResident.getTag();
+		File newEntrance = new File(authenticPassages.getAbsolutePath()+"/"+newResident.getTag()+"_"+newResident.getEmail());
+		Files.write(newEntrance.toPath(), content.getBytes(), StandardOpenOption.CREATE_NEW);
+		FileOutputStream fos;
+		fos = new FileOutputStream(newResident.getTag());
+		BufferedOutputStream bos = new BufferedOutputStream(fos);
+		bos.write(content.getBytes());
+		
+		return Response.ok("200 OK").build();
+		}catch(Exception e){
+			return Response.status(400).build();
+		}
+	}
+	/////////Commands////////
+	//SilenceMode
+	@GET
+	@Path("/silence")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response toggleSilenceMode()
+	{
+		System.out.println("toggle silence mode...");
+		String urlToSend = "http://"+ARDUINO_INET_ADDR+"/arduino/digital/"+2+"/1";
+		URL u;
+		try {
+			u = new URL(urlToSend);
+			InputStream is = u.openStream();
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+                    is));
+				String inputLine;
+				while ((inputLine = in.readLine()) != null) {
+					System.out.println(inputLine);
+				}
+				return Response.ok("200 OK").build();
+		} catch (Exception e) {
+		
+			e.printStackTrace();
+			return Response.status(400).build();
+		}
+	}
+	//Disparar alarme
+	@GET
+	@Path("/pushbutton")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response firePushButton()
+	{
+		System.out.println("pushbutton");
+		String urlToSend = "http://"+ARDUINO_INET_ADDR+"/arduino/digital/"+1+"/1";
+		URL u;
+		try {
+			u = new URL(urlToSend);
+			InputStream is = u.openStream();
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+                    is));
+				String inputLine;
+				while ((inputLine = in.readLine()) != null) {
+					System.out.println(inputLine);
+				}
+				return Response.ok("200 OK "+inputLine).build();
+		} catch (Exception e) {
+		
+			e.printStackTrace();
+			return Response.status(400).build();
+		}			
+	}
+	
+	
+	//Disparar alarme
+	@GET
+	@Path("/authenticate")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response authenticate(String rfidTag)
+	{
+		System.out.println("Authenticating");
+		String urlToSend = "http://"+ARDUINO_INET_ADDR+"/arduino/digital/"+0+"/1";
+		URL u;
+		try {
+			u = new URL(urlToSend);
+			InputStream is = u.openStream();
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+                    is));
+				String inputLine;
+				while ((inputLine = in.readLine()) != null) {
+					System.out.println(inputLine);
+					//parsing rfid
+					
+					
+				}
+				rfidTagInstance = rfidTag;
+				return Response.ok("200 OK").build();
+		} catch (Exception e) {
+		
+			e.printStackTrace();
+			return Response.status(400).build();
+		}			
+	}
+	@GET
+	@Path("/broadcast")
+	public static Response broadcastAlert() {
+		return Response.ok("AlertBroadcast").build();
+		
+		
+		
+	}
 	private int initResource() {
 		System.out.println("Initiating resource");
 		// TODO Auto-generated method stub
+		
+		
 		//Arduino communication parameters
 		 //Nome, eMail, nº telefone, queue fifo com as chegadas e partidas,
 		 //ordenadas com os utilizadores por ordem de chegada
@@ -121,148 +277,19 @@ public class HomeSecuritySystem {
 				 +nonAuthenticatedEntrances.size();
 
 		 //Connecção com arduino e cliente
+		 killListener();
 		  (new Thread(new ServerHandler())).start();
 		return 0;
 	}
-	@GET
-	@Path("/residents/home")
-	public Response getListAtHome(){
-		if(residentsColl==null){
-			return Response.status(400).build();
-		}
-		return Response.ok(residentsAtHome.keySet().toArray()).build();
-	}
-	@GET
-	@Path("/residents/history/valid")
-	public Response getListValidPassages(){
-		if(authenticatedEntrances==null){
-			return Response.status(400).build();
-		}
-		return Response.ok(authenticatedEntrances.keySet().toArray()).build();
-	}
-	@GET
-	@Path("/residents/history/invalid")
-	public Response getlistNonValidPassages(){
-		if(nonAuthenticatedEntrances==null){
-			return Response.status(400).build();
-		}
-		return Response.ok(nonAuthenticatedEntrances.keySet().toArray()).build();
-	}
-	@POST
-	@Path("/residents/new")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public Response addMember(@PathParam("tag")String tag,String name, String email,int phoneNr)
-	{
-		try{
-			System.out.println("Adding user with tag : "+tag);
-		Resident r = new Resident(name, email, phoneNr, tag);
-		String content = name+"_"+email+"_"+phoneNr+"_"+tag;
-		File newEntrance = new File(authenticPassages.getAbsolutePath()+"/"+tag+"_"+email);
-		Files.write(newEntrance.toPath(), content.getBytes(), StandardOpenOption.CREATE_NEW);
-		FileOutputStream fos;
-		fos = new FileOutputStream(tag);
-		BufferedOutputStream bos = new BufferedOutputStream(fos);
-		bos.write(content.getBytes());
-		
-		return Response.ok().build();
-		}catch(Exception e){
-			return Response.status(400).build();
-		}
-	}
-	/////////Commands////////
-	//SilenceMode
-	@POST
-	@Path("/silence")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response toggleSilenceMode()
-	{
-		System.out.println("toggle silence mode...");
-		String urlToSend = "http://"+ARDUINO_INET_ADDR+"/arduino/digital/"+2+"/1";
-		URL u;
-		try {
-			u = new URL(urlToSend);
-			InputStream is = u.openStream();
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-                    is));
-				String inputLine;
-				while ((inputLine = in.readLine()) != null) {
-					System.out.println(inputLine);
-				}
-				return Response.ok().build();
-		} catch (Exception e) {
-		
-			e.printStackTrace();
-			return Response.status(400).build();
-		}
-	}
-	//Disparar alarme
-	@POST
-	@Path("/pushbutton")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response firePushButton()
-	{
-		System.out.println("pushbutton");
-		String urlToSend = "http://"+ARDUINO_INET_ADDR+"/arduino/digital/"+1+"/1";
-		URL u;
-		try {
-			u = new URL(urlToSend);
-			InputStream is = u.openStream();
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-                    is));
-				String inputLine;
-				while ((inputLine = in.readLine()) != null) {
-					System.out.println(inputLine);
-				}
-				return Response.ok().build();
-		} catch (Exception e) {
-		
-			e.printStackTrace();
-			return Response.status(400).build();
-		}			
-	}
-	
-	
-	//Disparar alarme
-	@GET
-	@Path("/authenticate")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response authenticate(String rfidTag)
-	{
-		System.out.println("Authenticating");
-		String urlToSend = "http://"+ARDUINO_INET_ADDR+"/arduino/digital/"+1+"/1";
-		URL u;
-		try {
-			u = new URL(urlToSend);
-			InputStream is = u.openStream();
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-                    is));
-				String inputLine;
-				while ((inputLine = in.readLine()) != null) {
-					System.out.println(inputLine);
-					//parsing rfid
-					
-					
-				}
-				rfidTagInstance = rfidTag;
-				return Response.ok("200").build();
-		} catch (Exception e) {
-		
-			e.printStackTrace();
-			return Response.status(400).build();
-		}			
-	}
-	@GET
-	@Path("/broadcast")
-	public static Response broadcastAlert() {
-		return Response.ok("AlertBroadcast").build();
-		
-		
+	private void killListener() {
+		// TODO Auto-generated method stub
+		stopThread = true;
 		
 	}
 	private static void uploadResidents(File residentsFile) {
 		
 		File[] residents = residentsFile.listFiles();
+		System.out.println(residents);
 		for(File resident:residents){
 			
 			if(resident.isDirectory()){
@@ -286,6 +313,7 @@ public class HomeSecuritySystem {
 	}
 	private static void uploadAuthenticatedPassages(File authenticatedPassagesFile){
 		File[] passages = authenticatedPassagesFile.listFiles();
+		System.out.println(passages);
 		for(File passage:passages){
 			if(passage.isDirectory()){
 				
@@ -309,6 +337,7 @@ public class HomeSecuritySystem {
 	private static void uploadNonAuthenticatedPassages(File nonAuthenticatedPassagesFile){
 		try{
 		File[] passages = nonAuthenticatedPassagesFile.listFiles();
+		System.out.println(passages);
 		for(File passage:passages){
 		
 			if(!passage.isDirectory()){
@@ -341,8 +370,8 @@ public class HomeSecuritySystem {
 		System.out.println(message);
 		String[]passageData = message.split("");
 		Calendar current = Calendar.getInstance();
-		String date = String.valueOf(current.getTime().getMonth())
-						+"_"+String.valueOf(current.getTime().getDay())
+		String date = String.valueOf(current.getTime().getYear())
+						+"_"+String.valueOf(current.getTime().getMonth())
 						+"_"+String.valueOf(current.getTime().getDay())
 						+"_"+String.valueOf(current.getTime().getHours()
 						+"_"+String.valueOf(current.getTime().getMinutes())
@@ -423,9 +452,9 @@ public class HomeSecuritySystem {
 	public static class ServerHandler implements Runnable{
 		
 		public void run() {
-			
+			stopThread = false;
 			System.out.println("Arduino listener started!");
-			while(true){
+			while(!stopThread){
 				try {
 					//Listen to entrances and exits
 						String urlToSend = "http://"+ARDUINO_INET_ADDR+"/arduino/digital/"+4+"/1";
