@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
+import android.widget.Toast;
 
 /**
  * Created by Vanessa on 5/28/2017.
@@ -31,12 +32,12 @@ public class ActivitySettings extends AppCompatActivity {
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-        previousSettings = (Settings) bundle.get(PREVIOUS_SETTINGS);
+        previousSettings = bundle.getParcelable(PREVIOUS_SETTINGS);
 
         silentMode = (Switch) findViewById(R.id.switch_silent_mode);
         alarmMode = (Switch) findViewById(R.id.switch_alarm_mode);
-        silentMode.setShowText(previousSettings.getSilentMode());
-        alarmMode.setShowText(previousSettings.getAlarmMode());
+        silentMode.setChecked(previousSettings.getSilentMode());
+        alarmMode.setChecked(previousSettings.getAlarmMode());
         auth = "";
 
         btn_auth = (Button) findViewById(R.id.button_settings_auth);
@@ -51,7 +52,10 @@ public class ActivitySettings extends AppCompatActivity {
         btn_ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                Toast.makeText(view.getContext(), "Changes saved", Toast.LENGTH_SHORT).show();
                 createSettings();
+
             }
         });
 
@@ -59,6 +63,7 @@ public class ActivitySettings extends AppCompatActivity {
         btn_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Toast.makeText(view.getContext(), "Changes canceled", Toast.LENGTH_SHORT).show();
                 createSettings();
             }
         });
@@ -67,22 +72,18 @@ public class ActivitySettings extends AppCompatActivity {
 
     public void createSettings() {
 
-        boolean silentModeStatus = silentMode.getShowText();
-        boolean alarmModeStatus = alarmMode.getShowText();
+        boolean silentModeStatus = silentMode.isChecked();
+        boolean alarmModeStatus = alarmMode.isChecked();
 
-        if((previousSettings.getSilentMode()!=silentModeStatus)|| (previousSettings.getAlarmMode()!=alarmModeStatus)||!auth.isEmpty()){
-            Settings updatedSettings = new Settings(silentModeStatus, alarmModeStatus, auth);
 
-            Log.i("settings", "sendingData");
+        Settings updatedSettings = new Settings(silentModeStatus, alarmModeStatus, auth);
 
-            Intent i = new Intent();
-            i.putExtra(SETTINGS, updatedSettings);
-            setResult(RESULT_OK, i);
+        Log.i("settings", "sendingData!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        Log.i("updateSettings", updatedSettings.toString() );
 
-        }else{
-            setResult(RESULT_CANCELED);
-        }
-
+        Intent i = new Intent();
+        i.putExtra(SETTINGS, updatedSettings);
+        setResult(RESULT_OK, i);
         finish();
 
     }

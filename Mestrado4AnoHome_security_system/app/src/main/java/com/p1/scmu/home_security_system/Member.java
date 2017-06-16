@@ -2,17 +2,11 @@ package com.p1.scmu.home_security_system;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Vanessa on 5/23/2017.
@@ -24,7 +18,7 @@ public class Member implements Parcelable{
     public String email;
     public String rfid;
     public int mobile;
-    public List<String> arrivesDepartures;
+    public String arrivesDepartures;
 
     public String id; // identify user
 
@@ -33,6 +27,7 @@ public class Member implements Parcelable{
         this.email = "";
         this.mobile = 0;
         this.rfid = "";
+        this.arrivesDepartures="";
     }
 
     public Member(String fullName, String email, int mobile, String rfid) {
@@ -40,9 +35,10 @@ public class Member implements Parcelable{
         this.email = email;
         this.mobile = mobile;
         this.rfid = rfid;
+        this.arrivesDepartures="";
     }
 
-    public Member(String fullName, String email, int mobile, String rfid, List<String> dates) {
+    public Member(String fullName, String email, int mobile, String rfid, String dates) {
         this.fullName = fullName;
         this.email = email;
         this.mobile = mobile;
@@ -50,17 +46,13 @@ public class Member implements Parcelable{
         this.arrivesDepartures = dates;
     }
 
-    protected Member(Parcel in) {
+    public Member(Parcel in) {
 
         fullName = in.readString();
         email = in.readString();
         mobile = in.readInt();
         rfid = in.readString();
-
-        List<String> dates  = new ArrayList<>();
-        in.readList(dates, List.class.getClassLoader());
-        if (dates.size() > 0)
-            arrivesDepartures = new ArrayList<>(dates);
+        arrivesDepartures= in.readString();
     }
 
     @Override
@@ -70,15 +62,7 @@ public class Member implements Parcelable{
         parcel.writeString(email);
         parcel.writeInt(mobile);
         parcel.writeString(id);
-
-        if (arrivesDepartures != null) {
-            List<String> dates = new ArrayList<>();
-            for(String entry : dates) arrivesDepartures.add(entry);
-
-            parcel.writeList(arrivesDepartures);
-        } else {
-            parcel.writeList(null);
-        }
+        parcel.writeString(arrivesDepartures);
     }
 
     public static final Parcelable.Creator<Member> CREATOR = new Parcelable.Creator<Member>() {
@@ -102,45 +86,32 @@ public class Member implements Parcelable{
         if (json == null)
             return;
 
-        fullName = (String)json.get("Name");
-        email = (String)json.get("Email");
-        mobile = (int)json.get("Number");
-        rfid = (String)json.get("RFID");
-
-        JSONArray jArrayDates = json.getJSONArray("Dates");
-        for (int j = 0; j < json.length(); j++) {
-            try {
-                arrivesDepartures.add(jArrayDates.get(j).toString());
-            } catch (JSONException e) {
-                Log.e("JsonArray", "JsonArray dates invalid");
-                e.printStackTrace(); }
-        }
-
+        fullName = (String)json.get("name");
+        email = (String)json.get("email");
+        mobile = (int)json.get("number");
+        rfid = (String)json.get("rfid");
+        arrivesDepartures = (String) json.get("date");
     }
 
     public void getMemberFromJSON(JsonObject json) throws JSONException {
         if (json == null)
             return;
 
-        fullName = json.get("Name").getAsString();
-        email = json.get("Email").getAsString();
-        mobile = json.get("Number").getAsInt();
-        rfid = json.get("RFID").getAsString();
+        fullName = json.get("name").getAsString();
+        email = json.get("email").getAsString();
+        mobile = json.get("number").getAsInt();
+        rfid = json.get("rfid").getAsString();
+        arrivesDepartures = json.get("date").getAsString();
 
-        JsonArray jArrayDates = json.getAsJsonArray("Dates");
-        for (int j = 0; j < json.size(); j++) {
-            arrivesDepartures.add(jArrayDates.get(j).toString());
-            //Log.e("JsonArray", "JsonArray dates invalid");
-        }
     }
 
     public JSONObject asJSON() throws JSONException {
         return new JSONObject() {{
-            put("Name", fullName);
-            put("Email", email);
-            put("Number", mobile);
-            put("RFID", rfid);
-            put("Dates", new JSONArray(arrivesDepartures));
+            put("name", fullName);
+            put("email", email);
+            put("number", mobile);
+            put("rfid", rfid);
+            put("date", arrivesDepartures);
         }};
     }
 }

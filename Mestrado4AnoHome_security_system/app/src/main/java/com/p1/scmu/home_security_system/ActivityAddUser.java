@@ -28,7 +28,7 @@ public class ActivityAddUser extends ActivityUser {
     private Button btn_submit;
     private ImageButton btn_rfid;
     private boolean readyToSubmit=false;
-        private boolean alreadyCreating = false;
+    private boolean alreadyCreating = false;
 
 
     @Override

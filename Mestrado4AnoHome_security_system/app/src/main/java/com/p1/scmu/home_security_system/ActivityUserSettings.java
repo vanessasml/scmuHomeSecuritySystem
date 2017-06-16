@@ -19,6 +19,7 @@ import android.widget.Toast;
 public class ActivityUserSettings extends ActivityUser {
 
         public static final String UPDATE_MEMBER = "UpdateMember";
+    public static final String MEMBER = "Member";
 
         private static final int request_code =1;
 
@@ -30,7 +31,7 @@ public class ActivityUserSettings extends ActivityUser {
         private ImageButton btn_rfid;
         private boolean readyToSubmit=false;
         private boolean alreadyCreating = false;
-        private Member selectedMember, updatedMember;
+        private Member selectedMember;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +40,7 @@ public class ActivityUserSettings extends ActivityUser {
 
             Intent intent = getIntent();
             Bundle bundle = intent.getExtras();
-            selectedMember = (Member) bundle.get("Member");
+            selectedMember = bundle.getParcelable(MEMBER);
 
             inputLayoutName = (TextInputLayout) findViewById(R.id.settings_text_input_name);
             inputLayoutEmail = (TextInputLayout) findViewById(R.id.settings_text_input_email);
@@ -77,11 +78,13 @@ public class ActivityUserSettings extends ActivityUser {
                 }
             });
 
-            btn_ok = (Button) findViewById(R.id.button_ok);
+            btn_ok = (Button) findViewById(R.id.button_ok_user_settings);
             btn_ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    submitForm();
+                    Toast.makeText(view.getContext(), "Changes saved", Toast.LENGTH_SHORT).show();
+                    updateMember();
+
                 }
             });
         }
@@ -100,9 +103,9 @@ public class ActivityUserSettings extends ActivityUser {
             }
         }
 
-        protected void submitForm(){
-            super.submitForm();
-            updateMember();
+        protected boolean submitForm(){
+            boolean canSubmit = super.submitForm();
+            return canSubmit;
         }
 
         public void startRFIDActivity(View view) {
@@ -114,25 +117,22 @@ public class ActivityUserSettings extends ActivityUser {
 
     private void updateMember() {
 
-            Log.i("atButton", "sendingData");
+        Log.i("atButtonokUpdate", "sendingData!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-            updatedMember = selectedMember; // para ficar com a mesma lista de arriveDepartures
-            updatedMember.fullName = inputName.getText().toString().trim();
-            updatedMember.email = inputEmail.getText().toString().trim();
-            updatedMember.mobile = Integer.parseInt(inputNumber.getText().toString());
-            updatedMember.rfid = inputRFID.getText().toString().trim();
+        selectedMember.fullName = inputName.getText().toString().trim();
+        Log.i("updated fullname:", selectedMember.fullName);
+        selectedMember.email = inputEmail.getText().toString().trim();
+        Log.i("updated email:", selectedMember.email);
+        //selectedMember.mobile = Integer.parseInt(inputNumber.getText().toString());
+        selectedMember.rfid = inputRFID.getText().toString().trim();
+        Log.i("updated rfid:", selectedMember.rfid);
 
-            if(updatedMember.fullName.equals(selectedMember.fullName)
-                    &&  updatedMember.email.equals(selectedMember.email)
-                    && updatedMember.mobile==selectedMember.mobile
-                    && updatedMember.rfid.equals(selectedMember.rfid))
-                return;
 
-            Intent i = new Intent();
-            i.putExtra(UPDATE_MEMBER, updatedMember);
-            setResult(RESULT_OK, i);
+        Intent i = new Intent();
+        i.putExtra(UPDATE_MEMBER, selectedMember);
 
-            finish();
-        }
+        setResult(RESULT_OK, i);
+        finish();
 
+    }
 }

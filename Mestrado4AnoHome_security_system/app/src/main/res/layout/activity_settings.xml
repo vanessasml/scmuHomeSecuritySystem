@@ -14,27 +14,6 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/layout_silent_mode"
-            android:layout_width="wrap_content"
-            android:layout_height="85dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_weight="0.02"
-            android:orientation="horizontal">
-
-            <Switch
-                android:id="@+id/switch_silent_mode"
-                android:layout_width="207dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="0.08"
-                android:checked="false"
-                android:text="@string/Silent_mode_off"
-                android:textOff="@string/Silent_mode_off"
-                android:textOn="@string/Silent_mode_on"
-                android:textSize="18sp" />
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/layout_alarm_mode"
             android:layout_width="207dp"
             android:layout_height="85dp"
@@ -57,9 +36,31 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/layout_silent_mode"
+            android:layout_width="207dp"
+            android:layout_height="85dp"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:layout_weight="0.02"
+            android:orientation="horizontal"
+            android:weightSum="1">
+
+            <Switch
+                android:id="@+id/switch_silent_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:checked="false"
+                android:text="@string/Silent_mode_off"
+                android:textOff="@string/Silent_mode_off"
+                android:textOn="@string/Silent_mode_on"
+                android:textSize="18sp"
+                tools:checked="false" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="207dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="center_vertical|center_horizontal"
             android:layout_weight="0.02"
             android:orientation="horizontal">
 
@@ -84,13 +85,13 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="58dp"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/button_cancel_settings"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginRight="1dp"
             android:layout_weight="1"
             android:background="@color/colorTab"
@@ -99,7 +100,7 @@
         <Button
             android:id="@+id/button_ok_settings"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="1dp"
             android:layout_weight="1"
             android:background="@color/colorTab"

@@ -90,6 +90,39 @@
                 android:focusableInTouchMode="true"
                 android:clickable="true"/>
 
+            <EditText
+                android:id="@+id/user_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/imageButton"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="Name"
+                android:visibility="invisible" />
+
+            <EditText
+                android:id="@+id/user_email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/imageButton"
+                android:layout_toEndOf="@+id/user_phone"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="Name"
+                android:visibility="invisible" />
+
+            <EditText
+                android:id="@+id/user_rfid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="Name"
+                android:visibility="invisible"
+                android:layout_above="@+id/user_time" />
+
         </RelativeLayout>
 
     </RelativeLayout>

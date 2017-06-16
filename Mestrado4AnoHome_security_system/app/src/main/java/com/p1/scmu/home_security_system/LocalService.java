@@ -19,22 +19,12 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.pubnub.api.PNConfiguration;
-import com.pubnub.api.PubNub;
-import com.pubnub.api.callbacks.SubscribeCallback;
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
-import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -43,7 +33,7 @@ import java.util.List;
 
 public class LocalService extends Service {
 
-    private static final String URL = "http://192.168.1.9:8080/scmu/services/homeSecurity/";
+    private static final String URL = "http://192.168.10.199:8080/scmu/services/homeSecurity/";
     public static final String GET_MEMBERSI = "residents/home/";
     public static final String GET_MEMBERSIO = "residents/history/invalid/";
     public static final String GET_MEMBERS = "residents/List/";
@@ -70,61 +60,7 @@ public class LocalService extends Service {
     private List<Member> allMembers;
     private List<Member> membersI;
     private List<Member> membersIO;
-    PNConfiguration pnConfiguration;
-    PubNub pubnub;
-    PubSubPnCallback pubSubPnCallback;
 
-    public void initPubNub(){
-        pnConfiguration = new PNConfiguration();
-        pnConfiguration.setSubscribeKey("SubscribeKey");
-        pnConfiguration.setPublishKey("PublishKey");
-        pnConfiguration.setSecure(false);
-
-        pubnub = new PubNub(pnConfiguration);
-
-        pubnub.addListener(this.pubSubPnCallback);
-        pubnub.subscribe()
-                .channels(Arrays.asList(CHANNEL_MEMBERS, CHANNEL_MEMBERSI, CHANNEL_MEMBERSIO)) // subscribe to channels
-                .execute();
-
-    }
-
-    public class PubSubPnCallback extends SubscribeCallback {
-        @Override
-        public void status(PubNub pubnub, PNStatus status) {
-            // for common cases to handle, see: https://www.pubnub.com/docs/java/pubnub-java-sdk-v4
-        }
-        @Override
-        public void message(PubNub pubnub, PNMessageResult message) {
-            manageMessages(message.getMessage(), message.getChannel());
-        }
-        @Override
-        public void presence(PubNub pubnub, PNPresenceEventResult presence) {
-            // no presence handling for simplicity
-        }
-    }
-
-    private void manageMessages(JsonElement message, String channel) {
-
-        try {
-            JsonArray jsonArray = message.getAsJsonArray();
-            for(int i=0;i<jsonArray.size();i++){
-                JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
-                Member member = new Member();
-                member.getMemberFromJSON(jsonObject);
-
-                if(channel.equals(CHANNEL_MEMBERS)) {
-                    allMembers.add(member);
-                }else if(channel.equals(CHANNEL_MEMBERSI)){
-                    membersI.add(member);
-                }else if(channel.equals(CHANNEL_MEMBERSIO)){
-                    membersIO.add(member);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public void SendRequest()
     {
@@ -168,7 +104,7 @@ public class LocalService extends Service {
     public List<Member> getMembers(){
 
         Member j = new Member("Joao", "joao@joao.com", 919239, "qwerty");
-        Member m = new Member("Maria", "maria@joao.com", 919239, "aiai");
+        Member m = new Member("Maria", "maria@joao.com", 919239, "memebr1");
         List<Member> members= new ArrayList<Member>();
         members.add(j);
         members.add(m);
@@ -246,8 +182,6 @@ public class LocalService extends Service {
         Log.i(TAG, "Service onCreate");
 
         isRunning=true;
-
-        //initPubNub();
 
         Cache cache = new DiskBasedCache(getCacheDir(), 1024*10240);
         Network network = new BasicNetwork(new HurlStack());

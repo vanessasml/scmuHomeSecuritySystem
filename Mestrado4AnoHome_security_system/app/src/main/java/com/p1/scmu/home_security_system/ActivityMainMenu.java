@@ -30,8 +30,8 @@ import java.util.List;
 public class ActivityMainMenu extends AppCompatActivity {
 
     private final static String TAG = ActivityMainMenu.class.getSimpleName();
-    private static int request_code_settings = 1;
-    private static int request_code_user_settings=2;
+    private static int request_code_settings = 9;
+    private static int request_code_user_settings=8;
     private final static String MEMBER = "Member";
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -78,7 +78,6 @@ public class ActivityMainMenu extends AppCompatActivity {
             mIsBound = true;
             //  int statusCode = mBoundService.getStatusCode();
             // Log.d("Binding.java","called onServiceConnected. statusCode: " + statusCode);
-
             if(localService == null) Log.d("scasda","NULL");
             else serviceStarted=true;
 
@@ -152,7 +151,7 @@ public class ActivityMainMenu extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         appOwner = new Member();
-        currSettings = new Settings();
+        currSettings = new Settings(false, false, "");
         //enableWifiService();
         Intent intent = new Intent(this, LocalService.class);
         startService(intent);
@@ -206,27 +205,31 @@ public class ActivityMainMenu extends AppCompatActivity {
 
     }
 
-
-
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.i("ActivitySettings", "receivingDataInMainActivity");
+        Log.i("state", "receivingDataInMainActivity");
         if (requestCode == request_code_settings) {
             if (resultCode == RESULT_OK) {
                 Log.i("ActivitySettings", "guardando");
-                Settings settings = (Settings) data.getExtras().get(ActivitySettings.SETTINGS);
-                currSettings = settings;
+                Settings settings = data.getParcelableExtra(ActivitySettings.SETTINGS);
+                Log.i("Settings", settings.toString());
+                currSettings=settings;
                 sendSettingsToServer(settings);
+                Log.i("state", "endOnActivityResult");
             }
         }else if(requestCode == request_code_user_settings){
             if(resultCode == RESULT_OK) {
-                Log.i("ActivityAddUser", "guardando");
-                Member member = (Member) data.getExtras().get(ActivityAddUser.MEMBER);
-                int index = memberList.indexOf(appOwner);
-                memberList.add(index, member);
-                memberList.remove(appOwner);
+                Log.i("ActivityUserSet", "guardando");
+                Member member = data.getParcelableExtra(ActivityUserSettings.UPDATE_MEMBER);
+                Log.i("ActivityUserSet", "conseguiu o parcelable");
+                Log.i("Membername", member.toString());
+                if(memberList!=null){
+                    memberList.remove(appOwner);
+                    memberList.add( member);
+                }
                 appOwner=member;
                 sendToInsertMemberToServer(member);
+                Log.i("state", "endOnActivityResult");
             }
         }
     }
@@ -237,6 +240,7 @@ public class ActivityMainMenu extends AppCompatActivity {
 
     private void startSettingsActivity() {
         Intent intent = new Intent(this, ActivitySettings.class);
+        currSettings.setAuthTag(appOwner.rfid);
         intent.putExtra(ActivitySettings.PREVIOUS_SETTINGS, currSettings);
         startActivityForResult(intent, request_code_settings);
     }

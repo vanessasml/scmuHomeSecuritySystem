@@ -57,17 +57,23 @@ public abstract class ActivityUser extends AppCompatActivity {
         btn_submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                submitForm();
+                boolean canSubmit = submitForm();
+                if (canSubmit) {
+                    setResult(RESULT_OK);
+                    finish();
+                }
             }
         });
 
     }
 
-    protected void submitForm(){
-        if(!validateEmail()) return;
-        if(!validateName()) return;
-        if(!validatePhoneNumber()) return;
+    protected boolean submitForm(){
+        if(!validateEmail()) return false;
+        if(!validateName()) return false;
+        if(!validatePhoneNumber()) return false;
+        return true;
     }
+
     public void startRFIDActivity(View view) {
         Log.i("ActivityRFIDReader", "Ready");
         Intent intent = new Intent(ActivityUser.this, ActivityRFIDReader.class);

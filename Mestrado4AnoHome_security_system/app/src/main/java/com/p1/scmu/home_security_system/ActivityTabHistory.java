@@ -20,7 +20,7 @@ import static android.app.Activity.RESULT_OK;
  * Created by Vanessa on 5/22/2017.
  */
 
-public class ActivityTabHistory extends Fragment{
+public class ActivityTabHistory extends Fragment {
 
     private final int request_code_update_member = 4;
 
@@ -49,6 +49,7 @@ public class ActivityTabHistory extends Fragment{
 //        members.add(m);
 
     }
+
 
     @Override
     public void onResume(){

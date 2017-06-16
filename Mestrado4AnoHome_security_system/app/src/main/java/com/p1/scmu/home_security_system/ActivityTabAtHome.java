@@ -20,7 +20,7 @@ import static android.app.Activity.RESULT_OK;
  * Created by Vanessa on 5/22/2017.
  */
 
-public class ActivityTabAtHome extends Fragment{
+public class ActivityTabAtHome extends Fragment {
 
 
     private final int request_code_update_member = 5;
@@ -43,7 +43,17 @@ public class ActivityTabAtHome extends Fragment{
         super.onActivityCreated(savedInstanceState);
 
         listView = (ListView) rootView.findViewById(R.id.list_at_home_users);
-
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Member member = (Member) adapterView.getItemAtPosition(i);
+                System.out.print("Member is not null? " + member!=null);
+//                String name = ((TextView) view.findViewById(R.id.user_name)).toString();
+//                String email = ((TextView) view.findViewById(R.id.user_email)).toString();
+//                int phone = Integer.parseInt(((TextView) view.findViewById(R.id.user_phone)).toString());
+//                String rfid = ((TextView) view.findViewById(R.id.user_rfid)).toString();
+            }
+        });
     }
 
     @Override

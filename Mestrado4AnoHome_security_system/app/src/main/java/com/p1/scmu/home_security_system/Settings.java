@@ -51,6 +51,11 @@ public class Settings implements Parcelable {
     public String getAuthTag(){
         return authenticate;
     }
+    public void setSilentMode(boolean mode){
+        silentMode=mode;
+    }
+    public void setAlarmMode(boolean mode){alarmMode=mode; }
+    public void setAuthTag(String tag){ authenticate=tag;}
 
     public static final Creator<Settings> CREATOR = new Creator<Settings>() {
         @Override
@@ -64,7 +69,7 @@ public class Settings implements Parcelable {
         }
     };
 
-    public void getMemberFromJSON(JSONObject json) throws JSONException {
+    public void getSettingsFromJSON(JSONObject json) throws JSONException {
         if (json == null)
             return;
 
@@ -73,7 +78,7 @@ public class Settings implements Parcelable {
         authenticate = (String)json.get("Authenticate");
     }
 
-    public void getMemberFromJSON(JsonObject json) throws JSONException {
+    public void getSettingsFromJSON(JsonObject json) throws JSONException {
         if (json == null)
             return;
 
@@ -99,5 +104,9 @@ public class Settings implements Parcelable {
         boolean[] modes = {silentMode, alarmMode};
         parcel.writeBooleanArray(modes);
         parcel.writeString(authenticate);
+    }
+
+    public String toString(){
+        return getSilentMode() + " " + getAlarmMode() + " " + getAuthTag();
     }
 }

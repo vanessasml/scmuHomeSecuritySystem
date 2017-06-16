@@ -22,7 +22,7 @@ import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
-public class ActivityTabMembers extends Fragment{
+public class ActivityTabMembers extends Fragment {
 
     private final int request_code_add_member = 2;
     private final int request_code_update_member = 3;
@@ -50,6 +50,7 @@ public class ActivityTabMembers extends Fragment{
         });
         return rootView;
     }
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState){

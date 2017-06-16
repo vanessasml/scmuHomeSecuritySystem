@@ -28,7 +28,7 @@
     <string name="title_activity_Add_User">Add Member</string>
     <string name="title_associate_RFID_TAG">RFID association</string>
     <string name="title_activity_User_Settings">Edit Member</string>
-    <string name="settings_auth">Autenticate</string>
+    <string name="settings_auth">Authenticate</string>
     <string name="Alarm_mode_on">Alarm mode ON</string>
     <string name="Alarm_mode_off">Alarm mode OFF</string>
     <string name="Silent_mode_on">Silent mode on</string>

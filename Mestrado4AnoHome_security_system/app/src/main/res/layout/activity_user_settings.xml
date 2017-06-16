@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#d6dee7"
@@ -205,17 +206,19 @@
             android:layout_marginRight="1dp"
             android:layout_weight="1"
             android:background="@color/colorTab"
-            android:text="@string/button_cancel" />
+            android:text="@string/button_cancel"
+            tools:ignore="ButtonStyle" />
 
         <Button
-            android:id="@+id/button_ok"
+            android:id="@+id/button_ok_user_settings"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="1dp"
             android:layout_weight="1"
             android:background="@color/colorTab"
             android:elevation="0dp"
-            android:text="@string/button_ok" />
+            android:text="@string/button_ok"
+            tools:ignore="ButtonStyle" />
     </LinearLayout>
 
 </LinearLayout>
