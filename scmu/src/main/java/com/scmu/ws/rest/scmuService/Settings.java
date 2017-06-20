@@ -1,5 +1,9 @@
 package com.scmu.ws.rest.scmuService;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Settings {
 
     private boolean silentMode;
@@ -18,7 +22,7 @@ public class Settings {
         this.authenticate = authenticate;
     }
     
-    public Settings(boolean silentMode, boolean alarmMode, String authenticate){
+    public Settings(@JsonProperty("SilentMode")boolean silentMode, @JsonProperty("AlarmMode")boolean alarmMode, @JsonProperty("Authenticate")String authenticate){
         this.silentMode=silentMode;
         this.alarmMode=alarmMode;
         this.authenticate = authenticate;
@@ -32,6 +36,15 @@ public class Settings {
     public String getAuthTag(){
         return authenticate;
     }
+    public void getPassageFromJSON(JSONObject json) throws JSONException {
+        if (json == null)
+            return;
 
+        silentMode = (Boolean)json.get("SilentMode");
+        alarmMode = (Boolean)json.get("AlarmMode");
+        authenticate= (String)json.get("Authenticate");
+       
+
+    }
     
 }

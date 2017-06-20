@@ -8,29 +8,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+
 
 
 @Path("/homeSecurity")
@@ -39,6 +40,7 @@ public class HomeSecuritySystem {
 	final static  String ARDUINO_INET_ADDR = "192.168.1.6";
 	final int SERVER_PORT = 8000;
 	
+
 	
 	//Diretoria de ficheiros
 	 String basePath = "./storage";
@@ -56,7 +58,7 @@ public class HomeSecuritySystem {
 	// Value : String with the resident Name
 	
 	 static HashMap<String,String>residentsColl;
-	static HashMap<String,String>residentsAtHome;
+	 static HashMap<String,String>residentsAtHome;
 	// Key : String with the date
 	// Value : Boolean with false as Exit and True as Entrance
 	 static HashMap<String,String>authenticatedEntrances;
@@ -66,36 +68,87 @@ public class HomeSecuritySystem {
 	
 	int starting = initResource();
 	private static boolean stopThread;
-	
+	/* {
+	 * name :
+	 * 
+	 * arrive at: <hora>}*/
+	/* departure at: <hora>*/
 	
 	@GET
 	@Path("/residents/List")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getListResidents(){
+//		JSONObject teste = new JSONObject();
+//	
+//		teste.put("name", "teste");
+//		teste.put("email","teste@teste.com" );
+//		teste.put("number", "12345678");
+//		teste.put("rfid", "testeR");
+//		teste.put("data", "departure at 12:50:00");
+		JSONArray jsonA = new JSONArray();
+	//	jsonA.put(teste);
 		if(residentsColl==null){
 			return Response.status(400).build();
 		}
 		else if(residentsColl.isEmpty()){
 			String empty = "Server does not contain any residents";
-					return Response.ok().entity(empty).build();
+					return Response.ok().entity(jsonA).build();
 		}
-		else
-			return Response.ok(residentsColl.keySet().toArray()).build();
+		else{
+			jsonA = new JSONArray();
+			
+			Set<String> keys = residentsColl.keySet();
+			for(String key:keys){
+				JSONObject obj = new JSONObject();
+				String content = residentsColl.get(key);
+		
+				obj.put("name", content.split("_")[0]);
+				obj.put("email", content.split("_")[1]);
+				obj.put("number", content.split("_")[2]);
+				obj.put("rfid", content.split("_")[3]);
+				jsonA.put(obj);
+			//	obj.put("date", content.split("_")[4]);
+			}
+			return Response.ok(jsonA).build();
+			}
 	}
 	
 	@GET
 	@Path("/residents/home")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getListAtHome(){
-		if(residentsColl==null){
+		JSONObject teste = new JSONObject();
+		teste.put("name", "teste");
+		teste.put("email","teste@teste.com" );
+		teste.put("number", "12345678");
+		teste.put("rfid", "testeR");
+		teste.put("data", "departure at 12:50:00");
+		JSONArray jsonA = new JSONArray();
+		jsonA.put(teste);
+		if(residentsAtHome==null){
+			
 			return Response.status(400).build();
 		}
-		else if(residentsColl.isEmpty()){
+		else if(residentsAtHome.isEmpty()){
 			String empty = "Server does not contain any residents or nobody is at home";
 					return Response.ok().entity(empty).build();
 		}
 		else{
-		return Response.ok(residentsAtHome.keySet().toArray()).build();
+			jsonA = new JSONArray();
+			Set<String> keys = residentsAtHome.keySet();
+			for(String key:keys){
+				JSONObject obj = new JSONObject();
+				
+				String content = residentsAtHome.get(key);
+		
+				obj.put("name", content.split("_")[0]);
+				obj.put("email", content.split("_")[1]);
+				obj.put("number", content.split("_")[2]);
+				obj.put("rfid", content.split("_")[3]);
+				jsonA.put(obj);
+			//	obj.put("date", content.split("_")[4]);
+			}
+		return Response.ok(jsonA).build();
 		}
 	}
 	@GET
@@ -110,41 +163,52 @@ public class HomeSecuritySystem {
 					return Response.ok().entity(empty).build();
 		}
 		else
+		System.out.println(new JSONObject(authenticatedEntrances));
 		return Response.ok(authenticatedEntrances.keySet().toArray()).build();
 	}
 	@GET
 	@Path("/residents/history/invalid")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getlistNonValidPassages(){
+		
 		if(nonAuthenticatedEntrances==null){
 			return Response.status(400).build();
 		}
+		
 		else if(nonAuthenticatedEntrances.isEmpty()){
 			String empty = "Server does not contain any non-authenticated entrances";
 					return Response.ok().entity(empty).build();
 		}
 		else
+			
 		return Response.ok(nonAuthenticatedEntrances.keySet().toArray()).build();
 	}
 	@POST
 	@Path("/residents/new")
 	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
 	public Response addMember(Resident newResident)
-	{
+	{ 
 		try{
-			System.out.println("Adding user with tag : "+newResident.getTag());
-		//Resident r = new Resident(name, email, phoneNr, tag);
+		System.out.println("Adding user with tag : "+newResident.getTag());
 		String content = newResident.getName()+"_"+newResident.getEmail()+"_"+newResident.getPhoneNr()+"_"+newResident.getTag();
-		File newEntrance = new File(authenticPassages.getAbsolutePath()+"/"+newResident.getTag()+"_"+newResident.getEmail());
-		Files.write(newEntrance.toPath(), content.getBytes(), StandardOpenOption.CREATE_NEW);
+		System.out.println(content);
+		residentsColl.put(newResident.getTag(), content);
+		System.out.println(residentsFile.getPath()+"/"+newResident.getTag());
+		File newResidentF = new File(residentsFile.getPath()+"/"+newResident.getTag());
+		System.out.println(newResidentF.toPath());
+		Files.write(newResidentF.toPath(), content.getBytes(), StandardOpenOption.CREATE_NEW);
 		FileOutputStream fos;
 		fos = new FileOutputStream(newResident.getTag());
 		BufferedOutputStream bos = new BufferedOutputStream(fos);
 		bos.write(content.getBytes());
 		
+		
+		
+		System.out.println(residentsColl.size());
+		bos.close();
 		return Response.ok("200 OK").build();
 		}catch(Exception e){
+			System.out.println("Unable to add member.");
 			return Response.status(400).build();
 		}
 	}
@@ -152,7 +216,6 @@ public class HomeSecuritySystem {
 	@POST
 	@Path("/residents/settings")
 	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
 	public Response setSettings(Settings newSettings)
 	{
 		try{
@@ -280,7 +343,9 @@ public class HomeSecuritySystem {
 		//passagesColl = new HashMap<String,Passage>();
 		
 		residentsAtHome = new HashMap<String,String>();
+		
 		authenticatedEntrances = new HashMap<String,String>();
+		
 		nonAuthenticatedEntrances = new HashMap<String,String>();
 		 //Verifica se a diretoria de ficheiros existe, se não existir cria
 		 baseFile = new File(basePath);
@@ -320,19 +385,20 @@ public class HomeSecuritySystem {
 	private static void uploadResidents(File residentsFile) {
 		
 		File[] residents = residentsFile.listFiles();
-		System.out.println(residents);
+		System.out.println(residents+" residentsF");
 		for(File resident:residents){
 			
 			if(resident.isDirectory()){
 				
 				try {
-					RandomAccessFile raf = new RandomAccessFile(resident.getAbsolutePath(),"r");
+					RandomAccessFile raf = new RandomAccessFile(resident.getPath(),"r");
 					byte[] bArray = new byte[(int) raf.length()];
 					raf.read(bArray);
 					String rawData = new String(bArray);
 					String key = rawData.split("\\s")[0];
-					String name = rawData.split("\\s")[1]; 
-					residentsColl.put(key,name);
+					String content = rawData.split("\\s")[1]; 
+					residentsColl.put(resident.getName(), rawData);
+					
 				} catch (IOException e) {
 				
 					e.printStackTrace();
@@ -340,6 +406,7 @@ public class HomeSecuritySystem {
 			}
 			
 		}
+		System.out.println(residentsColl.size());
 		System.out.println("Finished residents");
 	}
 	private static void uploadAuthenticatedPassages(File authenticatedPassagesFile){
@@ -349,7 +416,7 @@ public class HomeSecuritySystem {
 			if(passage.isDirectory()){
 				
 				try {
-					RandomAccessFile raf = new RandomAccessFile(passage.getAbsolutePath(),"r");
+					RandomAccessFile raf = new RandomAccessFile(passage.getPath(),"r");
 					byte[] bArray = new byte[(int) raf.length()];
 					raf.read(bArray);
 					String rawData = new String(bArray);
@@ -374,7 +441,7 @@ public class HomeSecuritySystem {
 			if(!passage.isDirectory()){
 				
 				try {
-					RandomAccessFile raf = new RandomAccessFile(passage.getAbsolutePath(),"r");
+					RandomAccessFile raf = new RandomAccessFile(passage.getPath(),"r");
 					byte[] bArray = new byte[(int) raf.length()];
 					raf.read(bArray);
 					String rawData = new String(bArray);
@@ -460,11 +527,10 @@ public class HomeSecuritySystem {
 				nonAuthenticatedEntrances.put(date,content);
 				 newEntrance = new File(nonAuthenticPassages.getAbsolutePath()+"/"+date+message);
 				 Files.write(newEntrance.toPath(), content.getBytes(), StandardOpenOption.CREATE_NEW);
-					 
-					fos = new FileOutputStream(date);
-					 bos = new BufferedOutputStream(fos);
-					bos.write(content.getBytes());
-			break;
+				fos = new FileOutputStream(date);
+				bos = new BufferedOutputStream(fos);
+				bos.write(content.getBytes());
+		break;
 		case "P--":
 			broadcastAlert();
 		}
@@ -492,7 +558,7 @@ public class HomeSecuritySystem {
 						URL u = new URL(urlToSend);
 						InputStream is = u.openStream();
 						BufferedReader in = new BufferedReader(new InputStreamReader(
-		                        is));
+										is));
 							String inputLine;
 							TimeUnit.MILLISECONDS.sleep(250);
 							while ((inputLine = in.readLine()) != null) {
